@@ -25,4 +25,8 @@ catch [System.Net.WebException]
 #The ServicePoint object should now contain the Certificate for the site.
 $servicePoint = $request.ServicePoint
 [System.Security.Cryptography.X509Certificates.X509Certificate]$cert=$servicePoint.Certificate
-Write-Output $cert | Format-List * -f
+Write-Output $cert | Format-List *
+
+#If you need the more detail properties, cast to X509Certificate2
+$cert2 = [System.Security.Cryptography.X509Certificates.X509Certificate2]$cert
+Write-Output $cert2 | Format-List *
