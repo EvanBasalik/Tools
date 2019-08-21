@@ -10,7 +10,7 @@ $containerName = "networktraces"
 $networkWatcherName = "<Network Watcher name>"
 
 $rgName = "rgVMSSNW"
-$location ="East US"
+$location ="eastus"
 $VMSSName = "vmssevanb"
 $storageAccountName = $VMSSName + "vmsstest"
 $containerName = "networktraces"
@@ -53,20 +53,31 @@ else
 Write-Host "Getting a pointer to the VMSS"
 $VMSS = Get-AzVmss -VMScaleSetName $VMSSName -ResourceGroupName $rgName
 
-#Add Network Watcher extension to the VMSS
+#Add Network Watcher extension to the VMSS if necessary
 Write-Host "Adding Network Watcher to VMSS instances"
-$nwExt = Get-AzVMExtensionImage -Location $location -PublisherName Microsoft.Azure.NetworkWatcher -Type NetworkWatcherAgentWindows
-New-AzVmssExtension -VirtualMachineScaleSet $VMSS -Name $nwExt.Name -Publisher $nwExt.PublisherName -AutoUpgradeMinorVersion $True
+$nwExt = (Get-AzVMExtensionImage -Location $location -PublisherName Microsoft.Azure.NetworkWatcher -Type NetworkWatcherAgentWindows | Sort-Object -Descending Version)[0]
+Add-AzVmssExtension -VirtualMachineScaleSet $VMSS -Name "netwatcher" -Publisher $nwExt.PublisherName -AutoUpgradeMinorVersion $True -Type $nwExt.Type -TypeHandlerVersion $nwExt.Version.Substring(0,3)
+Update-AzVmss -VMScaleSetName $VMSSName -ResourceGroupName $rgName -VirtualMachineScaleSet $VMSS
+
+#Need to loop through and push new model to existing VMs
+for ($i = 0; $i -lt $VMSS.Sku.Capacity; $i++) 
+{
+    #Get VM from underlying VMSS
+    Update-AzVmssInstance -ResourceGroupName $rgName -VMScaleSetName $VMSS.Name -InstanceId $i
+}
 
 #Get Network Watcher Object
 Write-Host "Getting a pointer to Network Watcher"
-if ((Get-AzNetworkWatcher -ResourceGroupName $rgName -Name $networkWatcherName).count -eq 0)
+$nw = Get-AzResource | Where-Object {$_.ResourceType -eq "Microsoft.Network/networkWatchers" -and $_.Location -eq $location }
+$networkWatcher = Get-AzNetworkWatcher -Name $nw.Name -ResourceGroupName $nw.ResourceGroupName 
+if (($networkWatcher).count -eq 0)
 {
     $networkWatcher = New-AzNetworkWatcher -Name $networkWatcherName -ResourceGroupName $rgName -Location $location
 }
 else 
 {
-    $networkWatcher = Get-AzNetworkWatcher -ResourceGroupName $rgName -Name $networkWatcherName
+    $nw = Get-AzResource | Where-Object {$_.ResourceType -eq "Microsoft.Network/networkWatchers" -and $_.Location -eq $location }
+    $networkWatcher = Get-AzNetworkWatcher -Name $nw.Name -ResourceGroupName $nw.ResourceGroupName  
 }
 
 #Filters that we can tune to the solution
@@ -83,7 +94,6 @@ for ($i = 0; $i -lt $VMSS.Sku.Capacity; $i++)
 
     #Run the packet capture with a unique packet capture name
     $packetCaptureName = "capture_vm_" + $i  
-    $packetCapture = New-AzNetworkWatcherPacketCapture -NetworkWatcher $networkWatcher -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 60 -Filter $filter1, $filter2
-    $packetCapture
+    New-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 15 -Filter $filter1, $filter2
 }
 
