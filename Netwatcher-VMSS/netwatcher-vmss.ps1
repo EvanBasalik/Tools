@@ -54,16 +54,24 @@ Write-Host "Getting a pointer to the VMSS"
 $VMSS = Get-AzVmss -VMScaleSetName $VMSSName -ResourceGroupName $rgName
 
 #Add Network Watcher extension to the VMSS if necessary
-Write-Host "Adding Network Watcher to VMSS instances"
-$nwExt = (Get-AzVMExtensionImage -Location $location -PublisherName Microsoft.Azure.NetworkWatcher -Type NetworkWatcherAgentWindows | Sort-Object -Descending Version)[0]
-Add-AzVmssExtension -VirtualMachineScaleSet $VMSS -Name "netwatcher" -Publisher $nwExt.PublisherName -AutoUpgradeMinorVersion $True -Type $nwExt.Type -TypeHandlerVersion $nwExt.Version.Substring(0,3)
-Update-AzVmss -VMScaleSetName $VMSSName -ResourceGroupName $rgName -VirtualMachineScaleSet $VMSS
-
-#Need to loop through and push new model to existing VMs
-for ($i = 0; $i -lt $VMSS.Sku.Capacity; $i++) 
+if (($VMSS.VirtualMachineProfile.ExtensionProfile.Extensions | Where-Object {$_.Publisher -eq "Microsoft.Azure.NetworkWatcher"}).Count -eq 0)
 {
-    #Get VM from underlying VMSS
-    Update-AzVmssInstance -ResourceGroupName $rgName -VMScaleSetName $VMSS.Name -InstanceId $i
+    Write-Host "Adding Network Watcher to VMSS instances"
+    $nwExt = (Get-AzVMExtensionImage -Location $location -PublisherName Microsoft.Azure.NetworkWatcher -Type NetworkWatcherAgentWindows | Sort-Object -Descending Version)[0]
+    Add-AzVmssExtension -VirtualMachineScaleSet $VMSS -Name "netwatcher" -Publisher $nwExt.PublisherName -AutoUpgradeMinorVersion $True -Type $nwExt.Type -TypeHandlerVersion $nwExt.Version.Substring(0,3)
+    Update-AzVmss -VMScaleSetName $VMSSName -ResourceGroupName $rgName -VirtualMachineScaleSet $VMSS
+
+    #Need to loop through and push new model to existing VMs
+    Write-Host "Updating existing instances with the newly added extension"
+    for ($i = 0; $i -lt $VMSS.Sku.Capacity; $i++) 
+    {
+        #Get VM from underlying VMSS
+        Update-AzVmssInstance -ResourceGroupName $rgName -VMScaleSetName $VMSS.Name -InstanceId $i
+    }
+}
+else 
+{
+    Write-Host "Network Watcher already installed"
 }
 
 #Get Network Watcher Object
