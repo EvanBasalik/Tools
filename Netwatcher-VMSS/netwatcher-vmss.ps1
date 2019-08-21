@@ -95,13 +95,26 @@ $filter2 = New-AzPacketCaptureFilterConfig -Protocol UDP
 
 #Loop through and set up Network Watcher on each VM in the VMSS
 Write-Host "Kicking off a packet capture for the entire VMSS - VM by VM"
-for ($i = 0; $i -lt $VMSS.Sku.Capacity; $i++) 
+$VMs = Get-AzVmssVM -ResourceGroupName $rgName -VMScaleSetName $VMSSName
+foreach ($instance in $VMs) 
 {
+
     #Get VM from underlying VMSS
-    $VM = Get-AzVmssVM -ResourceGroupName $rgName -VMScaleSetName $VMSSName -InstanceId $i
+    $VM = Get-AzVmssVM -ResourceGroupName $rgName -VMScaleSetName $VMSSName -InstanceId $instance.InstanceId
 
     #Run the packet capture with a unique packet capture name
-    $packetCaptureName = "capture_vm_" + $i  
+    $packetCaptureName = "capture_vm_" + $VM.Name
     New-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 15 -Filter $filter1, $filter2
 }
+
+$running = $true
+while ($running) 
+{
+    $captures = Get-AzNetworkWatcherPacketCapture -NetworkWatcher $networkWatcher | Where-Object {$_.PacketCaptureStatus -ne "Running"}
+    if ($captures)
+    {
+
+    }
+}
+
 
