@@ -56,7 +56,7 @@ $VMSS = Get-AzVmss -VMScaleSetName $VMSSName -ResourceGroupName $rgName
 #Add Network Watcher extension to the VMSS
 Write-Host "Adding Network Watcher to VMSS instances"
 $nwExt = Get-AzVMExtensionImage -Location $location -PublisherName Microsoft.Azure.NetworkWatcher -Type NetworkWatcherAgentWindows
-Set-AzVmssExtension -VirtualMachineScaleSet $VMSS -Name $nwExt.Name -Publisher $nwExt.PublisherName -AutoUpgradeMinorVersion $True
+New-AzVmssExtension -VirtualMachineScaleSet $VMSS -Name $nwExt.Name -Publisher $nwExt.PublisherName -AutoUpgradeMinorVersion $True
 
 #Get Network Watcher Object
 Write-Host "Getting a pointer to Network Watcher"
