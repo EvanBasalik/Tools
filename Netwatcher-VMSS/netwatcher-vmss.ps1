@@ -90,7 +90,6 @@ $filter1 = New-AzPacketCaptureFilterConfig -Protocol TCP -RemoteIPAddress "1.1.1
 $filter2 = New-AzPacketCaptureFilterConfig -Protocol UDP 
 
 #Loop through and set up Network Watcher on each VM in the VMSS
-[array]$packetCaptures = @()
 Write-Host "Kicking off a packet capture for the entire VMSS - VM by VM"
 $VMs = Get-AzVmssVM -ResourceGroupName $rgName -VMScaleSetName $VMSSName
 foreach ($instance in $VMs) 
@@ -116,7 +115,6 @@ foreach ($instance in $VMs)
 
     if ($pc.ProvisioningState -eq "Succeeded")
     {
-        $packetCaptures += $pc
         Write-Host "Successfully started packet capture on VM$($instance)"
     }
     else {
@@ -126,30 +124,26 @@ foreach ($instance in $VMs)
 }
 
 #Wait for all the packet captures to either finish of end up in a failed state
-$done = $false
-while ($done -ne $true) 
+while ((Get-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName | Where-Object {$_.PacketCaptureStatus -eq "Running"}).count -ne 0) 
 {
-    foreach ($pc in $packetCaptures) {
-
-        #refresh the state
-        $pc = Get-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $pc.Name
-
-        if ($pc.ProvisoningState -eq "Succeeded")
-        {
-            if ($pc.PacketCaptureStatus -eq "Stopped") 
-            {
-                Write-Host "Packet capture $($pc.Name) is done. Removing..."
-                Remove-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $pc.Name
-                $packetCaptures.Remove($pc)
-                Write-Host "Packet capture removed"
-
-            }
-            else 
-            {
-                Write-Warning "Packet capture $($pc.Name) isn't done yet. Sleeping for 60 seconds"
-                Start-Sleep 60 
-            }
-        }
+    $runningCaptures = Get-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName | Where-Object {$_.PacketCaptureStatus -eq "Running"}
+    foreach ($capture in $runningCaptures) 
+    {
+        Write-Warning "Packet capture $($capture.Name) isn't done yet. Sleeping for 60 seconds"
     }
-    $done = $true
+    Start-Sleep 60 
+}
+
+#Now that all the traces are done, remove them
+if ($pc.ProvisoningState -eq "Succeeded")
+{
+    Write-Host "Packet capture $($pc.Name) is done. Removing..."
+    Remove-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $pc.Name
+    $packetCaptures.Remove($pc)
+    Write-Host "Packet capture removed"
+    else 
+    {
+        Write-Warning "Packet capture $($pc.Name) isn't done yet. Sleeping for 60 seconds"
+        Start-Sleep 60 
+    }
 }
