@@ -1,50 +1,43 @@
-##############################
-#.SYNOPSIS
-#Demonstrates how to enable Azure Netwatcher for all the VMs in some collection of VMs. In this case, uses an Azure VM Scale Set (VMSS)
-#Jointly developed by Jennifer Phuong and Evan Basalik
-#
-#.PARAMETER rgName
-#Resource group under which the Azure Netwatcher is provisioned
-#
-#.PARAMETER location
-#The regional location under which the resources should be provisioned
-#
-#.PARAMETER VMSSName
-#Name of a VMSS with one or more VMs
-#
-#.PARAMETER ctorageAccountName
-#The name of the Storage account that will be used/created to store the captured traces
-#
-#.PARAMETER containerName
-#The name of the container that will be used/created to store the captured traces
-#
-#.PARAMETER networkWatcherName
-#The name of the Network Watcher instance that will be used/created to capture the traces
-#
-[parameter(Mandatory=$true)][string]$rgName,
-[parameter(Mandatory=$false)][string]$location,
-[parameter(Mandatory=$false)][string]$VMSSName,
-[parameter(Mandatory=$false)][string]$storageAccountName,
-[parameter(Mandatory=$false)][string]$containerName,
-[parameter(Mandatory=$false)][string]$networkWatcherName
+<#
+.SYNOPSIS
+Demonstrates how to enable Azure Netwatcher for all the VMs in some collection of VMs. In this case, uses an Azure VM Scale Set (VMSS)
+Jointly developed by Jennifer Phuong and Evan Basalik
 
-#.EXAMPLE
-#Takes the array and get various pieces of VM data
-#Start-NetworkWatcherOnMultipleVMs -rgName rgVMSSNW -location eastus -VMSSName vmssevanba -storageAccountName vmsstest -containerName networktraces -networkWatcherName nw
+.PARAMETER rgName
+Resource group under which the Azure Netwatcher is provisioned
 
-#
-#.NOTES
-#Sample scripts are not supported under any Microsoft standard support program or service. 
-#The sample scripts are provided AS IS without warranty of any kind. Microsoft disclaims all 
-#implied warranties including, without limitation, any implied warranties of merchantability
-#or of fitness for a particular purpose. The entire risk arising out of the use or performance
-#of the sample scripts and documentation remains with you. In no event shall Microsoft, its 
-#authors, or anyone else involved in the creation, production, or delivery of the scripts be 
-#liable for any damages whatsoever (including, without limitation, damages for loss of business
-#profits, business interruption, loss of business information, or other pecuniary loss) arising
-#out of the use of or inability to use the sample scripts or documentation, even if Microsoft 
-#has been advised of the possibility of such damages.
-##############################
+.PARAMETER location
+The regional location under which the resources should be provisioned
+
+.PARAMETER VMSSName
+Name of a VMSS with one or more VMs
+
+.PARAMETER ctorageAccountName
+The name of the Storage account that will be used/created to store the captured traces
+
+.PARAMETER containerName
+The name of the container that will be used/created to store the captured traces
+
+.PARAMETER networkWatcherName
+The name of the Network Watcher instance that will be used/created to capture the traces
+
+.EXAMPLE
+Takes the array and get various pieces of VM data
+Start-NetworkWatcherOnMultipleVMs -rgName rgVMSSNW -location eastus -VMSSName vmssevanba -storageAccountName vmsstest -containerName networktraces -networkWatcherName nw
+
+
+.NOTES
+Sample scripts are not supported under any Microsoft standard support program or service. 
+The sample scripts are provided AS IS without warranty of any kind. Microsoft disclaims all 
+implied warranties including, without limitation, any implied warranties of merchantability
+or of fitness for a particular purpose. The entire risk arising out of the use or performance
+of the sample scripts and documentation remains with you. In no event shall Microsoft, its 
+authors, or anyone else involved in the creation, production, or delivery of the scripts be 
+liable for any damages whatsoever (including, without limitation, damages for loss of business
+profits, business interruption, loss of business information, or other pecuniary loss) arising
+out of the use of or inability to use the sample scripts or documentation, even if Microsoft 
+has been advised of the possibility of such damages.
+#>
 function Start-NetworkWatcherOnMultipleVMs  (
     [parameter(Mandatory=$true)][string]$rgName,
     [parameter(Mandatory=$false)][string]$location,
