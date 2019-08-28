@@ -1,0 +1,18 @@
+find JRE: 
+readlink -f $(which java) 
+
+compile: 
+javac RunOnce.java
+
+Run 11: 
+/usr/lib/jvm/java-11-openjdk-amd64/bin/javac RunOnce.java
+/usr/lib/jvm/java-11-openjdk-amd64/bin/java -Djavax.net.debug=ssl,handshake -cp .:./mssql-jdbc-7.4.1.jre11.jar RunOnce 'jdbc:sqlserver://evanba.database.windows.net:1433;database=SSLTest;user=endoftheday@evanba;password=TestingAzureCTP3!;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;' 100
+
+/usr/lib/jvm/java-11-openjdk-amd64/bin/java -cp .:./mssql-jdbc-7.4.1.jre11.jar RunOnce 'jdbc:sqlserver://evanba.database.windows.net:1433;database=SSLTest;user=endoftheday@evanba;password=TestingAzureCTP3!;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;' 100
+
+
+Run 8:
+/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac RunOnce.java
+/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/java -Djavax.net.debug=ssl,handshake -cp .:./mssql-jdbc-7.4.1.jre8.jar RunOnce 'jdbc:sqlserver://evanba.database.windows.net:1433;database=SSLTest;user=endoftheday@evanba;password=TestingAzureCTP3!;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;' 100
+
+/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/java -cp .:./mssql-jdbc-7.4.1.jre8.jar RunOnce 'jdbc:sqlserver://evanba.database.windows.net:1433;database=SSLTest;user=endoftheday@evanba;password=TestingAzureCTP3!;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;' 100
