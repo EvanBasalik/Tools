@@ -17,7 +17,7 @@ $containerName = "networktraces"
 $networkWatcherName = "nw"
 
 #Log in if necessary
-if (!Get-AzContext)
+if ((Get-AzContext).count-eq 0)
 {
     Connect-AzAccount
 }
@@ -98,7 +98,7 @@ foreach ($instance in $VMs)
 
     #Get VM from underlying VMSS
     $VM = Get-AzVmssVM -ResourceGroupName $rgName -VMScaleSetName $VMSSName -InstanceId $instance.InstanceId
-    Write-Host "Starting on $($instance )"
+    Write-Host "Starting on $($instance.Name)"
 
     #Run the packet capture with a unique packet capture name
     $packetCaptureName = "capture_vm_" + $VM.Name
