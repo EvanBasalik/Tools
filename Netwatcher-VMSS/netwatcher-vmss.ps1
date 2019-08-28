@@ -90,6 +90,7 @@ $filter1 = New-AzPacketCaptureFilterConfig -Protocol TCP -RemoteIPAddress "1.1.1
 $filter2 = New-AzPacketCaptureFilterConfig -Protocol UDP 
 
 #Loop through and set up Network Watcher on each VM in the VMSS
+[array]$packetCaptures = @()
 Write-Host "Kicking off a packet capture for the entire VMSS - VM by VM"
 $VMs = Get-AzVmssVM -ResourceGroupName $rgName -VMScaleSetName $VMSSName
 foreach ($instance in $VMs) 
@@ -97,14 +98,47 @@ foreach ($instance in $VMs)
 
     #Get VM from underlying VMSS
     $VM = Get-AzVmssVM -ResourceGroupName $rgName -VMScaleSetName $VMSSName -InstanceId $instance.InstanceId
-    Write-Host "Starting on VM$($instance)"
+    Write-Host "Starting on $($instance )"
 
     #Run the packet capture with a unique packet capture name
     $packetCaptureName = "capture_vm_" + $VM.Name
-    $pc = New-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 15 -Filter $filter1, $filter2  -AsJob
-    Write-Host "Successfully started packet capture on VM$($instance)"
-    $pc
+    New-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 60 -Filter $filter1, $filter2  -AsJob
+
+    #Make a call back to Netwatcher to get more details on the packet capture
+    $pc = Get-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $packetCaptureName
+    $packetCaptures += $pc
+
+    if ($pc.ProvisoningState -eq "Succeeded")
+    {
+        Write-Host "Successfully started packet capture on VM$($instance)"
+    }
+    else {
+        Write-Error "Failed to start packet capture on VM$($instance)"
+    }
 }
 
+#Wait for all the packet captures to either finish of end up in a failed state
+$done = $false
+while ($done -ne $true) 
+{
+    foreach ($pc in $packetCaptures) {
 
+        #refresh the state
+        $pc = Get-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $pc.Name
 
+        if ($pc.ProvisoningState -eq "Succeeded")
+        {
+            if ($pc.PacketCaptureStatus -eq "Stopped") 
+            {
+                Write-Host "Packet capture $($pc.Name) is done. Removing..."
+                Remove-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $pc.Name
+                Write-Host "Packet capture removed"
+            }
+            else 
+            {
+                Write-Warning "Packet capture $($pc.Name) isn't done yet. Sleeping for 60 seconds"
+                Start-Sleep 60 
+            }
+        }
+    }
+}
