@@ -1,7 +1,7 @@
 #Demonstrates how to enable Azure Netwatcher for all the VMs in an Azure VM Scale Set (VMSS)
 #Jointly developed by Jennifer Phuong and Evan Basalik
 
-Azure services parameters
+#Azure services parameters
 $rgName = "<resource group name>"
 $location = "<region hosting the VMSS>"
 $VMSSName = "<Underlying VMSS name>" 
@@ -54,6 +54,7 @@ Write-Host "Getting a pointer to the VMSS"
 $VMSS = Get-AzVmss -VMScaleSetName $VMSSName -ResourceGroupName $rgName
 
 #Add Network Watcher extension to the VMSS if necessary
+Write-Host "Checking whether Network Watcher is already installed"
 if (($VMSS.VirtualMachineProfile.ExtensionProfile.Extensions | Where-Object {$_.Publisher -eq "Microsoft.Azure.NetworkWatcher"}).Count -eq 0)
 {
     Write-Host "Adding Network Watcher to VMSS instances"
@@ -82,11 +83,6 @@ if (($networkWatcher).count -eq 0)
 {
     $networkWatcher = New-AzNetworkWatcher -Name $networkWatcherName -ResourceGroupName $rgName -Location $location
 }
-else 
-{
-    $nw = Get-AzResource | Where-Object {$_.ResourceType -eq "Microsoft.Network/networkWatchers" -and $_.Location -eq $location }
-    $networkWatcher = Get-AzNetworkWatcher -Name $nw.Name -ResourceGroupName $nw.ResourceGroupName  
-}
 
 #Filters that we can tune to the solution
 Write-Host "Creating some packet filters"
@@ -101,20 +97,14 @@ foreach ($instance in $VMs)
 
     #Get VM from underlying VMSS
     $VM = Get-AzVmssVM -ResourceGroupName $rgName -VMScaleSetName $VMSSName -InstanceId $instance.InstanceId
+    Write-Host "Starting on VM$($instance)"
 
     #Run the packet capture with a unique packet capture name
     $packetCaptureName = "capture_vm_" + $VM.Name
-    New-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 15 -Filter $filter1, $filter2
+    $pc = New-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 15 -Filter $filter1, $filter2  -AsJob
+    Write-Host "Successfully started packet capture on VM$($instance)"
+    $pc
 }
 
-$running = $true
-while ($running) 
-{
-    $captures = Get-AzNetworkWatcherPacketCapture -NetworkWatcher $networkWatcher | Where-Object {$_.PacketCaptureStatus -ne "Running"}
-    if ($captures)
-    {
-
-    }
-}
 
 
