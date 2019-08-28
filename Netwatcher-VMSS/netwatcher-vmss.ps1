@@ -102,18 +102,26 @@ foreach ($instance in $VMs)
 
     #Run the packet capture with a unique packet capture name
     $packetCaptureName = "capture_vm_" + $VM.Name
-    New-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 60 -Filter $filter1, $filter2  -AsJob
+    New-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -TargetVirtualMachineId $VM.Id -PacketCaptureName $packetCaptureName -StorageAccountId $storageAccount.id -TimeLimitInSeconds 120 -Filter $filter1, $filter2  -AsJob
 
-    #Make a call back to Netwatcher to get more details on the packet capture
+    #Make a call back to Netwatcher to get current state of the packet capture
     $pc = Get-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $packetCaptureName
-    $packetCaptures += $pc
+    while ($pc.PacketCaptureStatus -eq "NotStarted") {
+        Write-Warning "Packet capture not started yet - sleeping for 30 seconds"
+        Start-Sleep 30
 
-    if ($pc.ProvisoningState -eq "Succeeded")
+        #Make a call back to Netwatcher to get current state of the packet capture
+        $pc = Get-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $packetCaptureName
+    }    
+
+    if ($pc.ProvisioningState -eq "Succeeded")
     {
+        $packetCaptures += $pc
         Write-Host "Successfully started packet capture on VM$($instance)"
     }
     else {
         Write-Error "Failed to start packet capture on VM$($instance)"
+        Write-Error $pc.PacketCaptureErrorText
     }
 }
 
@@ -132,7 +140,9 @@ while ($done -ne $true)
             {
                 Write-Host "Packet capture $($pc.Name) is done. Removing..."
                 Remove-AzNetworkWatcherPacketCapture -NetworkWatcherName $networkWatcher.Name -ResourceGroupName $networkWatcher.ResourceGroupName -PacketCaptureName $pc.Name
+                $packetCaptures.Remove($pc)
                 Write-Host "Packet capture removed"
+
             }
             else 
             {
@@ -141,4 +151,5 @@ while ($done -ne $true)
             }
         }
     }
+    $done = $true
 }
