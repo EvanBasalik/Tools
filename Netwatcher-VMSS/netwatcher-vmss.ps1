@@ -22,7 +22,7 @@ The name of the container that will be used/created to store the captured traces
 The name of the Network Watcher instance that will be used/created to capture the traces
 
 .EXAMPLE
-Takes the array and get various pieces of VM data
+Takes the information about the VMSS and gets all the VMs and triggers captures on all of them
 Start-NetworkWatcherOnMultipleVMs -rgName rgVMSSNW -location eastus -VMSSName vmssevanba -storageAccountName vmsstest -containerName networktraces -networkWatcherName nw
 
 
