@@ -45,7 +45,7 @@
 #out of the use of or inability to use the sample scripts or documentation, even if Microsoft 
 #has been advised of the possibility of such damages.
 ##############################
-function FunctionName  (
+function Start-NetworkWatcherOnMultipleVMs  (
     [parameter(Mandatory=$true)][string]$rgName,
     [parameter(Mandatory=$false)][string]$location,
     [parameter(Mandatory=$false)][string]$VMSSName,
