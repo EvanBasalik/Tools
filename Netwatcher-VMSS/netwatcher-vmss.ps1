@@ -30,7 +30,7 @@
 
 #.EXAMPLE
 #Takes the array and get various pieces of VM data
-#ListARMVMMetaData -SubscriptionArray $subs
+#Start-NetworkWatcherOnMultipleVMs -rgName rgVMSSNW -location eastus -VMSSName vmssevanba -storageAccountName vmsstest -containerName networktraces -networkWatcherName nw
 
 #
 #.NOTES
