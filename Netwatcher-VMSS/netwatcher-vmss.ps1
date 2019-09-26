@@ -12,7 +12,7 @@ The regional location under which the resources should be provisioned
 .PARAMETER VMSSName
 Name of a VMSS with one or more VMs
 
-.PARAMETER ctorageAccountName
+.PARAMETER storageAccountName
 The name of the Storage account that will be used/created to store the captured traces
 
 .PARAMETER containerName
