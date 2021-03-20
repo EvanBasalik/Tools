@@ -1,0 +1,20 @@
+let base36="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let source="ZZ";
+let target="1295"; //35(Z)*36^1 + 35(Z)*36^0
+
+
+let queryUnderlayName = "hcp-underlay-westus-cx-56";
+let queryFrom = datetime("2021-03-17T09:20:44.540Z");
+let queryTo = datetime("2021-03-19T09:20:44.540Z");
+UnderlayNodeInfo
+| where TIMESTAMP between(queryFrom..queryTo)
+| where UnderlayName == queryUnderlayName
+| summarize arg_max(TIMESTAMP, *) by HostName
+| project
+Region, ResourceGroup, Subscription, UnderlayName,
+VMSize, HostName, PrivateIPAddress, VMID, HostPlatform, HostID, HostOS, HostUptime, HostBootTime,
+CPUCores, CPULogicalCores, CPULoad15, MemTotal, 
+K8sReady, K8sMemoryPressure, K8sDiskPressure, K8sPIDPressure, K8sNetworkUnavailable, K8sOutOfDisk,
+CCPTotal, CCPEtcdTotal, CCPEtcdOperatorTotal, CCPAPIServerTotal, CCPSchedulerTotal, PodsTotal,
+HostKernelRelease, K8sVersion, VMScaleSetName, VMScaleSetInstance = VMName,
+HostImageName, HostImageVersion, UnderlaySpec, VMZone,RPTenant, Tenant
