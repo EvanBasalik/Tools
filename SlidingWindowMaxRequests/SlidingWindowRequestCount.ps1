@@ -1,7 +1,7 @@
 $activeRequests = [System.Collections.ArrayList]@()
 $count=0
 $highCount=10
-$filename = "2021-03-20--19-29-27.csv"
+$filename = "requests.csv"
 
 #Get-ChildItem -Filter *.csv | Select-Object -ExpandProperty FullName | Import-Csv | Export-Csv .\combinedcsvs.csv -NoTypeInformation
 Write-Host "Analyzing $($filename) looking for instances processing more than $($highCount) requests simultaneously"
