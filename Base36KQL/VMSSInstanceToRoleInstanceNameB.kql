@@ -1,0 +1,23 @@
+//VMSS instance ID naming convention from https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-instance-ids#scale-set-vm-computer-name
+//Full credit to Yoni Leibowitz for coming up with this variant on the fly during a LiveSite
+let f = (c: string, i: int) {
+    let c_int = toint(c);
+    let d = case(isnotnull(c_int) and c_int < 10, c_int, toint(to_utf8(c)[0]) - 55);
+    tolong(pow(36, i) * d)
+};
+datatable (roleInstanceName: string, VMSSInstanceName: string) [
+    '_TestVMSS_568',  'TestVMSS0000FS',
+    '_TestVMSS_1570', 'TestVMSS00017M',
+    '_TestVMSS_1733', 'TestVMSS0001C5',
+    '_TestVMSS_18',   'TestVMSS00000I',
+    '_TestVMSS_1520', 'TestVMSS000168',
+]
+| parse VMSSInstanceName with "TestVMSS" node_name
+| extend node_name = replace_string(node_name, "0", "")
+| extend chars = extract_all("(.{1})", node_name)
+| mv-apply with_itemindex=i c = chars on (extend x = array_length(chars) - i - 1 | summarize sum(f(c, x)))
+| project
+    VMSSInstanceName,
+    roleInstanceName,
+    calculatedRoleInstanceName = strcat("_TestVMSS_", sum_)
+| extend check = iff(roleInstanceName == calculatedRoleInstanceName,"true", "false")

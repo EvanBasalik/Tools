@@ -1,0 +1,28 @@
+//VMSS instance ID naming convention from https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-instance-ids#scale-set-vm-computer-name
+//Full credit to Nicholas Sparks for coming up with this variant on the fly during a LiveSite
+let TestData= datatable (roleInstanceName:string,VMSSInstanceName:string)
+[
+'_TestVMSS_568','TestVMSS0000FS',
+'_TestVMSS_1570','TestVMSS00017M',
+'_TestVMSS_1733','TestVMSS0001C5',
+'_TestVMSS_18','TestVMSS00000I',
+'_TestVMSS_1520','TestVMSS000168',
+'_TestVMSS_1564','TestVMSS00017G',
+'_TestVMSS_116','TestVMSS000038',
+'_TestVMSS_1573','TestVMSS00017P',
+'_TestVMSS_1311','TestVMSS00010F',
+'_TestVMSS_516','TestVMSS0000EC',
+'_TestVMSS_1285','TestVMSS0000ZP'
+];
+let VMSSInstanceConversionA = (inputStr:string) {
+    let raw=substring (inputStr, strlen(inputStr)-6);  //can hardcode 6 b/c that is in the VMSS spec
+    indexof("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",substring(raw, 0, 1)) * 60466176 +
+    indexof("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",substring(raw, 1, 1)) * 1679616 +
+    indexof("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",substring(raw, 2, 1)) * 46656 +
+    indexof("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",substring(raw, 3, 1)) * 1296 +
+    indexof("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",substring(raw, 4, 1)) * 36 + 
+    indexof("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",substring(raw, 5, 1)) * 1 
+};
+TestData 
+| project VMSSInstanceName, roleInstanceName, CalculatedRoleInstanceNumber=VMSSInstanceConversionA(VMSSInstanceName)
+| extend CheckA=iff(strcat("_",split(roleInstanceName, "_")[1],"_",CalculatedRoleInstanceNumber) == roleInstanceName, "true", "false")
