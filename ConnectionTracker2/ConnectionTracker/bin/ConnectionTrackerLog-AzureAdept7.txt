@@ -1,0 +1,66 @@
+ConnectionTracker was started with these arguments:
+Evaluating argument: S
+Argument value is: byoqm6cm86.database.windows.net
+Evaluating argument: U
+Argument value is: EndOfTheDay
+Evaluating argument: P
+Argument value is: TestingAzureCTP3!
+Evaluating argument: d
+Argument value is: CentralCollector
+Evaluating argument: b
+Argument value is: 11
+ConnectionTracker was started with these arguments:
+Evaluating argument: S
+Argument value is: byoqm6cm86.database.windows.net
+Evaluating argument: U
+Argument value is: EndOfTheDay
+Evaluating argument: P
+Argument value is: TestingAzureCTP3!
+Evaluating argument: d
+Argument value is: CentralCollector
+Evaluating argument: b
+Argument value is: 11
+ConnectionTracker was started with these arguments:
+Evaluating argument: S
+Argument value is: byoqm6cm86.database.windows.net
+Evaluating argument: U
+Argument value is: EndOfTheDay
+Evaluating argument: P
+Argument value is: TestingAzureCTP3!
+Evaluating argument: d
+Argument value is: CentralCollector
+Evaluating argument: b
+Argument value is: 
+ConnectionTracker was started with these arguments:
+Evaluating argument: S
+Argument value is: byoqm6cm86.database.windows.net
+Evaluating argument: U
+Argument value is: EndOfTheDay
+Evaluating argument: P
+Argument value is: TestingAzureCTP3!
+Evaluating argument: d
+Argument value is: CentralCollector
+Evaluating argument: b
+Argument value is: 
+ConnectionTracker was started with these arguments:
+Evaluating argument: S
+Argument value is: byoqm6cm86.database.windows.net
+Evaluating argument: U
+Argument value is: EndOfTheDay
+Evaluating argument: P
+Argument value is: TestingAzureCTP3!
+Evaluating argument: d
+Argument value is: CentralCollector
+Evaluating argument: b
+Argument value is: 11
+ConnectionTracker was started with these arguments:
+Evaluating argument: S
+Argument value is: byoqm6cm86.database.windows.net
+Evaluating argument: U
+Argument value is: EndOfTheDay
+Evaluating argument: P
+Argument value is: TestingAzureCTP3!
+Evaluating argument: d
+Argument value is: CentralCollector
+Evaluating argument: b
+Argument value is: 1

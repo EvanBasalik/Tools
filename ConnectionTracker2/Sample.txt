@@ -1,0 +1,1 @@
+connectiontracker -Syourservernamehere -E -H1 -q -Q"your linked server query here"

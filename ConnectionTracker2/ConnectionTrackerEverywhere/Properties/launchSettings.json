@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConnectionTrackerEverywhere": {
+      "commandName": "Project",
+      "commandLineArgs": "-T5 -F1.5"
+    }
+  }
+}
