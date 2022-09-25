@@ -2570,11 +2570,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\evanba\\OneDrive - Microsoft\\Tools\\ConnectionTracker2\\ConnectionTrackerEverywhere\\ConnectionTrackerEverywhere.csproj",
+      "projectUniqueName": "C:\\Users\\evanba\\source\\repos\\Tools\\ConnectionTracker2\\ConnectionTrackerEverywhere\\ConnectionTrackerEverywhere.csproj",
       "projectName": "ConnectionTrackerEverywhere",
-      "projectPath": "C:\\Users\\evanba\\OneDrive - Microsoft\\Tools\\ConnectionTracker2\\ConnectionTrackerEverywhere\\ConnectionTrackerEverywhere.csproj",
+      "projectPath": "C:\\Users\\evanba\\source\\repos\\Tools\\ConnectionTracker2\\ConnectionTrackerEverywhere\\ConnectionTrackerEverywhere.csproj",
       "packagesPath": "C:\\Users\\evanba\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\evanba\\OneDrive - Microsoft\\Tools\\ConnectionTracker2\\ConnectionTrackerEverywhere\\obj\\",
+      "outputPath": "C:\\Users\\evanba\\source\\repos\\Tools\\ConnectionTracker2\\ConnectionTrackerEverywhere\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\evanba\\AppData\\Roaming\\NuGet\\NuGet.Config",

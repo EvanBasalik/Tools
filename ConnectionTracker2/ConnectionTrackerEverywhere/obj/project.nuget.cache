@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "fFGUX7vWnx0VdxhUooh6F7FdwLAhvIjFexa5n2Ip4//LogdxEGp/54QrLf+yF4whyAONVezF/+TAavfYJaKWUQ==",
+  "dgSpecHash": "rfAYNXKHDTe2POt+fR/k+DLR6BxUx6FEa2LTM3YeMJ6N30kKPwr2hTcvW5vJr6YS/w8/49Sh7uXS6kbQPC296Q==",
   "success": true,
-  "projectFilePath": "C:\\Users\\evanba\\OneDrive - Microsoft\\Tools\\ConnectionTracker2\\ConnectionTrackerEverywhere\\ConnectionTrackerEverywhere.csproj",
+  "projectFilePath": "C:\\Users\\evanba\\source\\repos\\Tools\\ConnectionTracker2\\ConnectionTrackerEverywhere\\ConnectionTrackerEverywhere.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\evanba\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\evanba\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",
