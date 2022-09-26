@@ -1,23 +1,20 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ConnectionTrackerEverywhere
 {
     internal static class Program
     {
         private static string _server = "localhost";
-        private static string _instance = @"\";
         private static string _catalog = "master";
         private static string _password = "";
         private static string _username = "";
         private static bool _useIntegrated = true;
         private static int _delta = 5; // seconds
         private static double _factor = 1; // >1 will increase the delta over time, while <1 will decrease it
-        private static double _currentTimeSpan = _delta * _factor;
+        private static double _currentTimeSpan;
         private static int _hoursToRun = 1;
-        private static string _protocol = "dbmssocn";
         private static bool _pooling = false;
         private static bool _quiet = false;
         // BK 01 Nov 2008 -- added support for a query to be sent from the command line.
@@ -29,6 +26,10 @@ namespace ConnectionTrackerEverywhere
 
         static void Main(string[] args)
         {
+            //set up a listener so everything gets logged to disk
+            TextWriterTraceListener myListener = new TextWriterTraceListener("ConnectionTrackerEverywhere.log", "myListener");
+            Trace.Listeners.Add(myListener);
+            Trace.AutoFlush = true;
 
             if (args.GetLength(0) == 0 | args.GetLength(0) == 1)
             {
@@ -39,9 +40,8 @@ namespace ConnectionTrackerEverywhere
                 Console.WriteLine("-PSQL Server password");
                 Console.WriteLine("-Etrusted connection");
                 Console.WriteLine("-TDelta between connections(seconds)");
-                Console.WriteLine("-FFactor for the connection delta");
+                Console.WriteLine("-FFactor for the connection delta (note: enclose in \"\" if you want to pass in a decimal");
                 Console.WriteLine("-HTime to Run (hours)");
-                Console.WriteLine("-CProtocol(tcp, or np) - If you want LPC, specify it by using a \".\" for the servername");
                 // BK 01 Nov 2008 -- added support for a query to be sent from the command line.
                 // BK 10 Feb 2009 -- added help text to instruct users to enclose queries in quotes, to accommodate spaces
                 Console.WriteLine("-QQuery to execute (results will NOT be displayed; enclose query in quotes)");
@@ -70,6 +70,8 @@ namespace ConnectionTrackerEverywhere
             {
                 Console.WriteLine("All data will be written to the log file specified in the app.config file");
                 Console.WriteLine("Data will be collected until approximately " + te.ToString());
+                Console.WriteLine("Starting delta between batches of " + _iterations.ToString() + " is " + _delta + " seconds");
+                Console.WriteLine("Delta factor is " + _factor.ToString());
                 Console.WriteLine("You can manually stop collection by hitting ctrl-c");
                 Console.WriteLine("Hit enter to start collecting data...");
                 Console.ReadLine();
@@ -91,16 +93,23 @@ namespace ConnectionTrackerEverywhere
             Console.WriteLine("The next set of logins will be done at approximately " + DateTime.Now.AddMilliseconds(_currentTimeSpan * 1000).ToString());
 
             //now, enter the loop
-            Debug.WriteLine(DateTime.Compare(te, DateTime.Now));
-            //Set the initial delta
-            _currentTimeSpan = _delta;
-            while (DateTime.Compare(te, DateTime.Now) < 0)
+            _currentTimeSpan = _delta * _factor;
+            while (DateTime.Compare(te, DateTime.Now) > 0)
             {
+                Debug.WriteLine("Haven't exceeded end time - running another batch");
+
                 int _sleepTime = (int) Math.Round(_currentTimeSpan *1000,0);
+#if DEBUG
+                Debug.WriteLine("_sleepTime = " + _sleepTime.ToString());
+#endif
                 Thread.Sleep(_sleepTime);  //round to the closest milliseconds for use 
+
+                Debug.WriteLine("Getting ready to DoLogins");
                 DoLogins();
-                //adjust the delta
+                //after the first iteration, increase _delta by _factor
                 _currentTimeSpan *= _factor;
+
+                Debug.WriteLine("_currentTimeSpan = " + _currentTimeSpan.ToString());
                 Console.WriteLine("The next set of logins will be done at approximately " + DateTime.Now.AddMilliseconds(_currentTimeSpan * 1000).ToString());
             }
         }
@@ -109,11 +118,16 @@ namespace ConnectionTrackerEverywhere
         {
             SqlConnection cn;
             string strCn = "";
-            Console.WriteLine(DateTime.Now.ToString() + ":Getting ready to open a batch of connections - " + _iterations.ToString());
+            Console.WriteLine(DateTime.Now.ToString() + ":Getting ready to open a batch of " + _iterations.ToString() + " connections");
             string result = "";
             //Now, we need to loop through the connection 10 times to get a good average
-            for (int i = 0; i < Program._iterations - 1; i--)
+            for (int i = 0; i < _iterations; i++)
             {
+
+#if DEBUG
+                Console.WriteLine("DoLogin iteration: " +i.ToString());
+#endif
+
                 //BK 06 Nov 2008 Added separate timing tracking for the query
                 DateTime ts = new DateTime();
                 DateTime te = new DateTime();
@@ -122,11 +136,11 @@ namespace ConnectionTrackerEverywhere
 
                 if (!_useIntegrated)
                 {
-                    strCn = "Pooling=False;Password=" + _password + ";User ID=" + _username + ";Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTracker;Network Library=" + _protocol;
+                    strCn = "Pooling=False;Password=" + _password + ";User ID=" + _username + ";Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
                 }
                 else
                 {
-                    strCn = "Pooling=False;Integrated Security=SSPI;Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTracker;Network Library=" + _protocol;
+                    strCn = "Pooling=False;Integrated Security=SSPI;Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
                 }
 
                 //based on the hidden switch, turn on pooling
@@ -249,7 +263,7 @@ namespace ConnectionTrackerEverywhere
                         _catalog = args[i].Substring(2);
                         break;
                     case "U":
-                    _username = args[i].Substring(2);
+                        _username = args[i].Substring(2);
                         _useIntegrated = false;
                         break;
                     case "P":
@@ -261,24 +275,18 @@ namespace ConnectionTrackerEverywhere
                         break;
                     case "T":
                         _delta = int.Parse(args[i].Substring(2));
+#if DEBUG
+                        Console.WriteLine("T = " + _delta);
+#endif
                         break;
                     case "F":
                         _factor = double.Parse(args[i].Substring(2));
+#if DEBUG
+                        Console.WriteLine("F = " + _factor);
+#endif
                         break;
                     case "H":
                         _hoursToRun = int.Parse(args[i].Substring(2));
-                        break;
-                    case "C":
-                        _protocol = args[i].Substring(2);
-                        switch (_protocol)
-                        {
-                            case "tcp":
-                                _protocol = "dbmssocn";
-                                break;
-                            case "np":
-                                _protocol = "dbnmpntw";
-                                break;
-                        }
                         break;
                     case "Q":
                         if (args[i].Substring(2) != "")
@@ -287,7 +295,7 @@ namespace ConnectionTrackerEverywhere
                         }
                         _weHaveAQuery = true;
                         break;
-                case "p":
+                    case "p":
                         _pooling = true;
                         break;
                     case "q":
@@ -301,6 +309,9 @@ namespace ConnectionTrackerEverywhere
                         {
                             _iterations = int.Parse(args[i].Substring(2));
                         }
+#if DEBUG
+                        Console.WriteLine("b = " + _iterations);
+#endif
                         break;
                     case "R":
                         _doFill = true;
@@ -314,16 +325,6 @@ namespace ConnectionTrackerEverywhere
                         }
                         break;
                 }
-            }
-
-            //we also need to account for a local scenario, where we want lpc
-            //TODO:  improve the logic here
-            //this change is specifically to accomodate Daas and FQDNs
-            if (_server.Substring(0,1) == ".")
-            {
-                _protocol = "dbmslpcn";
-                Console.WriteLine("WARNING - Changed protocol to LPC because \".\" was specified for server");
-                Trace.WriteLine("WARNING - Changed protocol to LPC because \".\" was specified for server");
             }
         }
     }
