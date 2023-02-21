@@ -1,0 +1,30 @@
+Please see the steps below in order to configure Network Monitor:
+
+1.  Download Network Monitor 
+	(http://www.microsoft.com/downloads/details.aspx?displaylang=en&FamilyID=983b941d-06cb-4658-b7f6-3088333d062f)
+
+2. Install Network Monitor on both the client and server experiencing the problem.  If you are not able to install it on the server you can install it on another machine that is connected to the same hub as the server or to the admin port of the switch that the server is on.  If you go this route you must synchronize the time between the client, server, and this third machine.
+
+3. Using the NMCap command-line utility, start the chained trace from an admin command prompt (chained = create a new capture file after reaching the �Temporary capture file size� rather than overwriting the current capture, creates 250 MB chained files))
+	a) [Netmon 3 installation folder]\NMCap /network * /capture /captureprocesses /file !!!changethisname!!!.chn:250M /MinDiskQuotaPercentage 20 /UseProfile 45c7af5a-d264-4243-90df-fb97082c52ac 
+	b) NOTE:  YOU MUST USE THE .CHN EXTENSION TO CAPTURE CHAINED TRACES
+	c) NOTE:  The target folder must exist for NMCap to create the trace file
+	d) NOTE: If running a very long time, add /maxframelength 100 
+
+4. Flush DNS
+	a) ipconfig /flushdns
+
+5. If dealing with an authentication failure, you will now want to purge the Kerberos tickets
+	a) klist tickets tgt purge
+
+6. Get the IP addresses of the client and the server
+	a)  on the client --> ipconfig /all > client.txt
+	b)  on the server --> ipconfig /all > server.txt
+
+7. Reproduce the problem, please note the exact time the problem reproduces.  Also, please note the exact error message.
+
+8. Stop the trace by hitting Ctrl-c in the command-line window
+
+
+
+IMPORTANT: Please remember to record the IP addresses of the server and client as well as the time that the problem occurred. 

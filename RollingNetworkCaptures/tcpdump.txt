@@ -1,0 +1,22 @@
+1.  Although tcpdump is installed by default on most distros and MacOS, if not see https://linuxize.com/post/tcpdump-command-in-linux/#installing-tcpdump-on-ubuntu-and-debian
+
+2. If possible, install tcpdump on both the client and server experiencing the problem.
+
+3. Using the tcpdump, start the chained trace from command prompt using sudo
+(chained = create a new capture file after target file size rather than overwriting the current capture. Default below will create 500 MB files)
+	a) tcpdump -i !!!use_any_or_desired_interfacename!!! -w !!!changethisname!!!.pcap -C 500 [-s 250]
+	b) NOTE: If running a very long time or with very high traffic, include the optional "-s 250"
+
+4. Flush DNS (https://www.techrepublic.com/article/how-to-flush-the-dns-cache-on-linux/)
+
+5. Get the IP addresses of the client and the server
+	a)  on the client --> ipconfig /all > client.txt
+	b)  on the server --> ipconfig /all > server.txt
+
+6. Reproduce the problem, please note the exact time the problem reproduces.  Also, please note the exact error message.
+
+7. Stop the trace by hitting Ctrl-c in the command-line window
+
+
+
+IMPORTANT: Please remember to record the IP addresses of the server and client as well as the time that the problem occurred. 
