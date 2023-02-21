@@ -1,0 +1,21 @@
+1.  Download Wireshark (https://www.wireshark.org/download.html)
+
+2. If possible, install WireShark on both the client and server experiencing the problem.
+
+3. Using the tshark command-line utility, start the chained trace from an admin command prompt 
+(chained = create a new capture file after target file size rather than overwriting the current capture. Default below will create 500 MB files)
+	a) [Wireshark installation folder]\tshark -i !!!interfacename!!! -w !!!changethisname!!!.pcapng -b filesize:500000 -t ud [-s 250]
+	c) NOTE: The target folder must exist for tshark to create the trace file
+	d) NOTE: If running a very long time or with very high traffic, include the optional "-s 250"
+
+4. Flush DNS
+	a) Windows - ipconfig /flushdns
+	b) Linux - https://www.techrepublic.com/article/how-to-flush-the-dns-cache-on-linux/
+
+5. Get the IP addresses of the client and the server
+	a)  on the client --> ipconfig /all > client.txt
+	b)  on the server --> ipconfig /all > server.txt
+
+6. Reproduce the problem, please note the exact time the problem reproduces.  Also, please note the exact error message.
+
+7. Stop the trace by hitting Ctrl-c in the command-line window
