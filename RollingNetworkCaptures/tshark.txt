@@ -1,4 +1,4 @@
-1.  Download Wireshark (https://www.wireshark.org/download.html)
+1. Download Wireshark (https://www.wireshark.org/download.html)
 
 2. If possible, install WireShark on both the client and server experiencing the problem.
 

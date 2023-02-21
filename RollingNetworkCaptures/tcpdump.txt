@@ -1,4 +1,4 @@
-1.  Although tcpdump is installed by default on most distros and MacOS, if not see https://linuxize.com/post/tcpdump-command-in-linux/#installing-tcpdump-on-ubuntu-and-debian
+1. Although tcpdump is installed by default on most distros and MacOS, if not see https://linuxize.com/post/tcpdump-command-in-linux/#installing-tcpdump-on-ubuntu-and-debian
 
 2. If possible, install tcpdump on both the client and server experiencing the problem.
 

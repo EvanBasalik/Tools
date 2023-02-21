@@ -1,5 +1,3 @@
-Please see the steps below in order to configure Network Monitor:
-
 1.  Download Network Monitor 
 	(http://www.microsoft.com/downloads/details.aspx?displaylang=en&FamilyID=983b941d-06cb-4658-b7f6-3088333d062f)
 
