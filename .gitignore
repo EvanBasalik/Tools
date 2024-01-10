@@ -400,3 +400,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 
+/ConnectionTracker2/.vs/ConnectionTracker/DesignTimeBuild/.dtbcache.v2
