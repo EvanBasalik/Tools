@@ -15,6 +15,13 @@
     "EntraInteractive": {
       "commandName": "Project",
       "commandLineArgs": "-I -Sevanbacore.database.windows.net -dLoopTest -T8 -b11"
+    },
+    "EntraServicePrincipal": {
+      "commandName": "Project",
+      "commandLineArgs": "-s -Sevanbacore.database.windows.net -dLoopTest -T8 -b11 -a{appid} -x{secret}"
+    },
+    "EntraIDDefault": {
+      "commandName": "Project",
+      "commandLineArgs": "-D -Sevanbacore.database.windows.net -dLoopTest -T8 -b11"
     }
   }
-}

@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
+using System;
 
 namespace ConnectionTrackerEverywhere
 {
@@ -10,12 +11,19 @@ namespace ConnectionTrackerEverywhere
         private static string _catalog = "master";
         private static string _password = "";
         private static string _username = "";
+        private static string _appID = "";
+        private static string _secret = "";
+        private static string _userassignedManagedServiceIdentity = "";
         private enum authenticationModeOptions
         {
-            Integrated=1,
-            EntraIDIntegrated=0, //since it's 2024 and Entra+MFA is the norm, make it the new default
-            EntraIDInteractive =2,
-            SQLAuthentication=4
+            EntraIDIntegrated, //since it's 2024 and Entra+MFA is the norm, make it the new default
+            Integrated,
+            EntraIDInteractive,
+            SQLAuthentication,
+            EntraIDServicePrincipal,
+            EntraIDDeviceCodeFlow, //note that this one doesn't make a ton of sense, but including just in case
+            EntraIDManagedIdentitywithUserAssignedManagedIdentity,
+            EntraIDDefault
         }
         private static authenticationModeOptions _authenticationMode;
         private static int _delta = 5; // seconds
@@ -47,9 +55,21 @@ namespace ConnectionTrackerEverywhere
                 Console.WriteLine("-PSQL Server password");
                 Console.WriteLine("-Etrusted connection");
                 //-i for Entra ID integrated authentiction (aka Azure Active Directory integrated)
-                Console.WriteLine("-iEntra authentication");
+                Console.WriteLine("-iEntra integrated authentication");
                 //-I for Entra ID interactive authentication to cover MFA (aka Azure Active Directory interactive)
-                Console.WriteLine("-IEntra integrated authentication");
+                Console.WriteLine("-IEntra interactive authentication");
+                //-s for Entra ID service principal. Requires -a for AppID, -p for AppID secret
+                Console.WriteLine("-sEntra service principal");
+                //-a for Entra ID AppID for use with service principal
+                Console.WriteLine("-sEntra appID");
+                //-p for Entra ID secret for use with service principal
+                Console.WriteLine("-xEntra appID secret");
+                //-j for Entra ID device code flow
+                Console.WriteLine("-jEntra device code flow");
+                //-M for Entra ID user-assigned managed service identity
+                Console.WriteLine("-MEntra user-assigned managed service identity");
+                //-D for Entra ID default for VS, etc.
+                Console.WriteLine("-DEntra default");
                 Console.WriteLine("-TDelta between connections(seconds)");
                 Console.WriteLine("-FFactor for the connection delta (note: enclose in \"\" if you want to pass in a decimal");
                 Console.WriteLine("-HTime to Run (hours)");
@@ -145,6 +165,18 @@ namespace ConnectionTrackerEverywhere
                 case authenticationModeOptions.SQLAuthentication:
                     strCn = "Pooling=False; Password=" + _password + ";User ID=" + _username + " ;Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
                     break;
+                case authenticationModeOptions.EntraIDServicePrincipal:
+                    strCn = "Pooling=False; Authentication=Active Directory Service Principal; User ID=" + _appID + " Password=" + _secret  + "; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDDeviceCodeFlow:
+                    strCn = "Pooling=False; Authentication=Active Directory Device Code Flow; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDManagedIdentitywithUserAssignedManagedIdentity:
+                    strCn = "Pooling=False; Authentication=Active Directory Managed Identity; User ID=" + _userassignedManagedServiceIdentity + "; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDDefault:
+                    strCn = "Pooling=False; Authentication=Active Directory Default; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
             }
 
             //based on the hidden switch, turn on pooling
@@ -153,7 +185,15 @@ namespace ConnectionTrackerEverywhere
                 strCn = strCn.Replace("Pooling=False;", "");
             }
 
-            strCn += ";Connection Timeout=" + _connectionTimeout.ToString();
+            //need to dramatically increase timeout for Device Code Flow
+            if (_authenticationMode == authenticationModeOptions.EntraIDDeviceCodeFlow | _authenticationMode == authenticationModeOptions.EntraIDDefault)
+            {
+                strCn += ";Connection Timeout=180";
+            }
+            else
+            {
+                strCn += ";Connection Timeout=" + _connectionTimeout.ToString();
+            }
 
 #if DEBUG
             Console.WriteLine(strCn);
@@ -306,6 +346,27 @@ namespace ConnectionTrackerEverywhere
                         break;
                     case "I":  //EntraID interactive
                         _authenticationMode = authenticationModeOptions.EntraIDInteractive;
+                        break;
+                    case "s": //EntraID service principal
+                        _authenticationMode = authenticationModeOptions.EntraIDServicePrincipal;
+                        break;
+                    case "a":
+                        _authenticationMode = authenticationModeOptions.EntraIDServicePrincipal;
+                        _appID= args[i].Substring(2);
+                        break;
+                    case "x":
+                        _authenticationMode = authenticationModeOptions.EntraIDServicePrincipal;
+                        _secret = args[i].Substring(2);
+                        break;
+                    case "j":
+                        _authenticationMode = authenticationModeOptions.EntraIDDeviceCodeFlow;
+                        break;
+                    case "M":  //EntraID Managed Identity with user-assigned managed identity
+                        _authenticationMode = authenticationModeOptions.EntraIDManagedIdentitywithUserAssignedManagedIdentity;
+                        _userassignedManagedServiceIdentity = args[i].Substring(2);
+                        break;
+                    case "D":  //EntraID default for use with VS, etc.
+                        _authenticationMode = authenticationModeOptions.EntraIDDefault;
                         break;
                     case "T":
                         _delta = int.Parse(args[i].Substring(2));
