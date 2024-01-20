@@ -83,6 +83,7 @@ namespace ConnectionTrackerEverywhere
                 Console.WriteLine("Data will be collected until approximately " + te.ToString());
                 Console.WriteLine("Starting delta between batches of " + _iterations.ToString() + " is " + _delta + " seconds");
                 Console.WriteLine("Delta factor is " + _factor.ToString());
+                Console.WriteLine("Authentication mode = " + _authenticationMode.ToString());
                 Console.WriteLine("You can manually stop collection by hitting ctrl-c");
                 Console.WriteLine("Hit enter to start collecting data...");
                 Console.ReadLine();
@@ -127,8 +128,38 @@ namespace ConnectionTrackerEverywhere
 
         private static void DoLogins()
         {
+            //build and define the connection string
             SqlConnection cn;
             string strCn = "";
+            switch (_authenticationMode)
+            {
+                case authenticationModeOptions.Integrated:
+                    strCn = "Pooling=False; Integrated Security=SSPI; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDIntegrated:
+                    strCn = "Pooling=False; Authentication=Active Directory Integrated; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDInteractive:
+                    strCn = "Pooling=False; Authentication=Active Directory Interactive; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.SQLAuthentication:
+                    strCn = "Pooling=False; Password=" + _password + ";User ID=" + _username + " ;Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+            }
+
+            //based on the hidden switch, turn on pooling
+            if (_pooling)
+            {
+                strCn = strCn.Replace("Pooling=False;", "");
+            }
+
+            strCn += ";Connection Timeout=" + _connectionTimeout.ToString();
+
+#if DEBUG
+            Console.WriteLine(strCn);
+#endif
+
+
             Console.WriteLine(DateTime.Now.ToString() + ":Getting ready to open a batch of " + _iterations.ToString() + " connections");
             string result = "";
             //Now, we need to loop through the connection 10 times to get a good average
@@ -144,30 +175,6 @@ namespace ConnectionTrackerEverywhere
                 DateTime te = new DateTime();
                 DateTime tqs = new DateTime();
                 DateTime tqe = new DateTime();
-
-                switch (_authenticationMode)
-                {
-                    case authenticationModeOptions.Integrated:
-                        strCn = "Pooling=False; Integrated Security=SSPI; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
-                        break;
-                    case authenticationModeOptions.EntraIDIntegrated:
-                        strCn = "Pooling=False; Authentication=Active Directory Integrated; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
-                        break;
-                    case authenticationModeOptions.EntraIDInteractive:
-                        strCn = "Pooling=False; Authentication=Active Directory Interactive; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
-                        break;
-                    case authenticationModeOptions.SQLAuthentication:
-                        strCn = "Pooling=False; Password=" + _password + ";User ID=" + _username + " ;Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
-                        break;
-                }
-
-                //based on the hidden switch, turn on pooling
-                if (_pooling)
-                {
-                    strCn = strCn.Replace("Pooling=False;", "");
-                }
-
-                strCn += ";Connection Timeout=" + _connectionTimeout.ToString();
 
                 cn = new SqlConnection(strCn);
                 Console.WriteLine("Getting ready to open a single connection");
@@ -272,6 +279,9 @@ namespace ConnectionTrackerEverywhere
                 //then, we can read everything >1 for the WriteLine
                 Trace.WriteLine("Evaluating argument: " + args[i].Substring(1, 1));
                 Trace.WriteLine("Argument value is: " + args[i].Substring(2));
+#if DEBUG
+                Console.WriteLine(args[i].Substring(1, 1) + " = " + args[i].Substring(2));
+#endif
                 switch (args[i].Substring(1, 1))
                 {
                     case "S":
@@ -299,15 +309,9 @@ namespace ConnectionTrackerEverywhere
                         break;
                     case "T":
                         _delta = int.Parse(args[i].Substring(2));
-#if DEBUG
-                        Console.WriteLine("T = " + _delta);
-#endif
                         break;
                     case "F":
                         _factor = double.Parse(args[i].Substring(2));
-#if DEBUG
-                        Console.WriteLine("F = " + _factor);
-#endif
                         break;
                     case "H":
                         _hoursToRun = int.Parse(args[i].Substring(2));
