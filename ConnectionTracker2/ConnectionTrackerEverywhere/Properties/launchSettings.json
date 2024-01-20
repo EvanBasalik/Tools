@@ -10,11 +10,11 @@
     },
     "EntraIntegrated": {
       "commandName": "Project",
-      "commandLineArgs": "-i -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11"
+      "commandLineArgs": "-i -Sconnectiontracker.database.windows.net -dLoopTest -Q\"select @@version\" -T3 -b1 -p"
     },
     "EntraInteractive": {
       "commandName": "Project",
-      "commandLineArgs": "-I -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11"
+      "commandLineArgs": "-I -Sconnectiontracker.database.windows.net -dLoopTest -Q\"select @@version\" -T3 -b1 -p"
     },
     "EntraServicePrincipal": {
       "commandName": "Project",
