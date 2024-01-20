@@ -6,22 +6,22 @@
     },
     "IntegratedAuth": {
       "commandName": "Project",
-      "commandLineArgs": "-E -SSconnectiontracker -dLoopTest -T8 -b11"
+      "commandLineArgs": "-E -Sconnectiontracker -dLoopTest -T8 -b11"
     },
     "EntraIntegrated": {
       "commandName": "Project",
-      "commandLineArgs": "-i -Sevanbacore.database.windows.net -dLoopTest -T8 -b11"
+      "commandLineArgs": "-i -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11"
     },
     "EntraInteractive": {
       "commandName": "Project",
-      "commandLineArgs": "-I -Sevanbacore.database.windows.net -dLoopTest -T8 -b11"
+      "commandLineArgs": "-I -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11"
     },
     "EntraServicePrincipal": {
       "commandName": "Project",
-      "commandLineArgs": "-s -Sevanbacore.database.windows.net -dLoopTest -T8 -b11 -a{appid} -x{secret}"
+      "commandLineArgs": "-s -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11 -a{appid} -x{secret}"
     },
     "EntraIDDefault": {
       "commandName": "Project",
-      "commandLineArgs": "-D -Sevanbacore.database.windows.net -dLoopTest -T8 -b11"
+      "commandLineArgs": "-D -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11"
     }
   }
