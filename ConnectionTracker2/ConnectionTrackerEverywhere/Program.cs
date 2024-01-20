@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
+using System;
 
 namespace ConnectionTrackerEverywhere
 {
@@ -10,7 +11,21 @@ namespace ConnectionTrackerEverywhere
         private static string _catalog = "master";
         private static string _password = "";
         private static string _username = "";
-        private static bool _useIntegrated = true;
+        private static string _appID = "";
+        private static string _secret = "";
+        private static string _userassignedManagedServiceIdentity = "";
+        private enum authenticationModeOptions
+        {
+            EntraIDIntegrated, //since it's 2024 and Entra+MFA is the norm, make it the new default
+            Integrated,
+            EntraIDInteractive,
+            SQLAuthentication,
+            EntraIDServicePrincipal,
+            EntraIDDeviceCodeFlow, //note that this one doesn't make a ton of sense, but including just in case
+            EntraIDManagedIdentitywithUserAssignedManagedIdentity,
+            EntraIDDefault
+        }
+        private static authenticationModeOptions _authenticationMode;
         private static int _delta = 5; // seconds
         private static double _factor = 1; // >1 will increase the delta over time, while <1 will decrease it
         private static double _currentTimeSpan;
@@ -33,12 +48,28 @@ namespace ConnectionTrackerEverywhere
 
             if (args.GetLength(0) == 0 | args.GetLength(0) == 1)
             {
-                Console.WriteLine("You must pass in the SQL Server instance, a valid username and password (or use integrated authentication)");
+                Console.WriteLine("You must pass in the SQL Server instance, a valid username and password, use integrated authentication, or use interactive or integrated EntraID authentication");
                 Console.WriteLine("-Sserver");
                 Console.WriteLine("-ddatabase");
                 Console.WriteLine("-USQL Server login");
                 Console.WriteLine("-PSQL Server password");
                 Console.WriteLine("-Etrusted connection");
+                //-i for Entra ID integrated authentiction (aka Azure Active Directory integrated)
+                Console.WriteLine("-iEntra integrated authentication");
+                //-I for Entra ID interactive authentication to cover MFA (aka Azure Active Directory interactive)
+                Console.WriteLine("-IEntra interactive authentication");
+                //-s for Entra ID service principal. Requires -a for AppID, -p for AppID secret
+                Console.WriteLine("-sEntra service principal");
+                //-a for Entra ID AppID for use with service principal
+                Console.WriteLine("-sEntra appID");
+                //-p for Entra ID secret for use with service principal
+                Console.WriteLine("-xEntra appID secret");
+                //-j for Entra ID device code flow
+                Console.WriteLine("-jEntra device code flow");
+                //-M for Entra ID user-assigned managed service identity
+                Console.WriteLine("-MEntra user-assigned managed service identity");
+                //-D for Entra ID default for VS, etc.
+                Console.WriteLine("-DEntra default");
                 Console.WriteLine("-TDelta between connections(seconds)");
                 Console.WriteLine("-FFactor for the connection delta (note: enclose in \"\" if you want to pass in a decimal");
                 Console.WriteLine("-HTime to Run (hours)");
@@ -72,6 +103,7 @@ namespace ConnectionTrackerEverywhere
                 Console.WriteLine("Data will be collected until approximately " + te.ToString());
                 Console.WriteLine("Starting delta between batches of " + _iterations.ToString() + " is " + _delta + " seconds");
                 Console.WriteLine("Delta factor is " + _factor.ToString());
+                Console.WriteLine("Authentication mode = " + _authenticationMode.ToString());
                 Console.WriteLine("You can manually stop collection by hitting ctrl-c");
                 Console.WriteLine("Hit enter to start collecting data...");
                 Console.ReadLine();
@@ -79,11 +111,11 @@ namespace ConnectionTrackerEverywhere
                 //BK 10 Feb 2009 -- added a column heading for query execution time if a query was submitted
                 if (_weHaveAQuery)
                 {
-                    Trace.WriteLine("Login Time,Server,Integrated Authentication,Login (ms),Query (ms),Result");
+                    Trace.WriteLine("Login Time,Server,Authentication Mode,Login (ms),Query (ms),Result");
                 }
                 else
                 {
-                    Trace.WriteLine("Login Time,Server,Integrated Authentication,Login (ms),Result");
+                    Trace.WriteLine("Login Time,Server,Authentication Mode,Login (ms),Result");
                 }
             }
 
@@ -116,8 +148,58 @@ namespace ConnectionTrackerEverywhere
 
         private static void DoLogins()
         {
+            //build and define the connection string
             SqlConnection cn;
             string strCn = "";
+            switch (_authenticationMode)
+            {
+                case authenticationModeOptions.Integrated:
+                    strCn = "Pooling=False; Integrated Security=SSPI; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDIntegrated:
+                    strCn = "Pooling=False; Authentication=Active Directory Integrated; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDInteractive:
+                    strCn = "Pooling=False; Authentication=Active Directory Interactive; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.SQLAuthentication:
+                    strCn = "Pooling=False; Password=" + _password + ";User ID=" + _username + " ;Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDServicePrincipal:
+                    strCn = "Pooling=False; Authentication=Active Directory Service Principal; User ID=" + _appID + " Password=" + _secret  + "; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDDeviceCodeFlow:
+                    strCn = "Pooling=False; Authentication=Active Directory Device Code Flow; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDManagedIdentitywithUserAssignedManagedIdentity:
+                    strCn = "Pooling=False; Authentication=Active Directory Managed Identity; User ID=" + _userassignedManagedServiceIdentity + "; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+                case authenticationModeOptions.EntraIDDefault:
+                    strCn = "Pooling=False; Authentication=Active Directory Default; Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
+                    break;
+            }
+
+            //based on the hidden switch, turn on pooling
+            if (_pooling)
+            {
+                strCn = strCn.Replace("Pooling=False;", "");
+            }
+
+            //need to dramatically increase timeout for Device Code Flow
+            if (_authenticationMode == authenticationModeOptions.EntraIDDeviceCodeFlow | _authenticationMode == authenticationModeOptions.EntraIDDefault)
+            {
+                strCn += ";Connection Timeout=180";
+            }
+            else
+            {
+                strCn += ";Connection Timeout=" + _connectionTimeout.ToString();
+            }
+
+#if DEBUG
+            Console.WriteLine(strCn);
+#endif
+
+
             Console.WriteLine(DateTime.Now.ToString() + ":Getting ready to open a batch of " + _iterations.ToString() + " connections");
             string result = "";
             //Now, we need to loop through the connection 10 times to get a good average
@@ -133,23 +215,6 @@ namespace ConnectionTrackerEverywhere
                 DateTime te = new DateTime();
                 DateTime tqs = new DateTime();
                 DateTime tqe = new DateTime();
-
-                if (!_useIntegrated)
-                {
-                    strCn = "Pooling=False;Password=" + _password + ";User ID=" + _username + ";Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
-                }
-                else
-                {
-                    strCn = "Pooling=False;Integrated Security=SSPI;Initial Catalog=" + _catalog + ";Data Source=" + _server + ";Application Name=ConnectionTrackerEverywhere";
-                }
-
-                //based on the hidden switch, turn on pooling
-                if (_pooling)
-                {
-                    strCn = strCn.Replace("Pooling=False;", "");
-                }
-
-                strCn += ";Connection Timeout=" + _connectionTimeout.ToString();
 
                 cn = new SqlConnection(strCn);
                 Console.WriteLine("Getting ready to open a single connection");
@@ -234,7 +299,7 @@ namespace ConnectionTrackerEverywhere
                 }
 
 
-                Trace.Write(ts + "," + _server + "," + _useIntegrated);
+                Trace.Write(ts + "," + _server + "," + _authenticationMode.ToString());
                 Trace.Write("," + Math.Round(te.Subtract(ts).TotalMilliseconds, 0));
                 if (_weHaveAQuery)
                 {
@@ -254,6 +319,9 @@ namespace ConnectionTrackerEverywhere
                 //then, we can read everything >1 for the WriteLine
                 Trace.WriteLine("Evaluating argument: " + args[i].Substring(1, 1));
                 Trace.WriteLine("Argument value is: " + args[i].Substring(2));
+#if DEBUG
+                Console.WriteLine(args[i].Substring(1, 1) + " = " + args[i].Substring(2));
+#endif
                 switch (args[i].Substring(1, 1))
                 {
                     case "S":
@@ -264,26 +332,47 @@ namespace ConnectionTrackerEverywhere
                         break;
                     case "U":
                         _username = args[i].Substring(2);
-                        _useIntegrated = false;
+                        _authenticationMode = authenticationModeOptions.SQLAuthentication;
                         break;
                     case "P":
                         _password = args[i].Substring(2);
-                        _useIntegrated = false;
+                        _authenticationMode = authenticationModeOptions.SQLAuthentication;
                         break;
-                    case "E":
-                        _useIntegrated = true;
+                    case "E":   //the old standby - Integrated authentication
+                        _authenticationMode = authenticationModeOptions.Integrated;
+                        break;
+                    case "i":  //EntraID integrated
+                        _authenticationMode = authenticationModeOptions.EntraIDIntegrated;
+                        break;
+                    case "I":  //EntraID interactive
+                        _authenticationMode = authenticationModeOptions.EntraIDInteractive;
+                        break;
+                    case "s": //EntraID service principal
+                        _authenticationMode = authenticationModeOptions.EntraIDServicePrincipal;
+                        break;
+                    case "a":
+                        _authenticationMode = authenticationModeOptions.EntraIDServicePrincipal;
+                        _appID= args[i].Substring(2);
+                        break;
+                    case "x":
+                        _authenticationMode = authenticationModeOptions.EntraIDServicePrincipal;
+                        _secret = args[i].Substring(2);
+                        break;
+                    case "j":
+                        _authenticationMode = authenticationModeOptions.EntraIDDeviceCodeFlow;
+                        break;
+                    case "M":  //EntraID Managed Identity with user-assigned managed identity
+                        _authenticationMode = authenticationModeOptions.EntraIDManagedIdentitywithUserAssignedManagedIdentity;
+                        _userassignedManagedServiceIdentity = args[i].Substring(2);
+                        break;
+                    case "D":  //EntraID default for use with VS, etc.
+                        _authenticationMode = authenticationModeOptions.EntraIDDefault;
                         break;
                     case "T":
                         _delta = int.Parse(args[i].Substring(2));
-#if DEBUG
-                        Console.WriteLine("T = " + _delta);
-#endif
                         break;
                     case "F":
                         _factor = double.Parse(args[i].Substring(2));
-#if DEBUG
-                        Console.WriteLine("F = " + _factor);
-#endif
                         break;
                     case "H":
                         _hoursToRun = int.Parse(args[i].Substring(2));

@@ -1,7 +1,27 @@
 {
   "profiles": {
-    "ConnectionTrackerEverywhere": {
-      "commandName": "Project"
+    "SQLAuth": {
+      "commandName": "Project",
+      "commandLineArgs": "-U{username} -P{password} -Sconnectiontracker.database.windows.net -dLoopTest -T8 -F\"1.1\" -b11"
+    },
+    "IntegratedAuth": {
+      "commandName": "Project",
+      "commandLineArgs": "-E -Sconnectiontracker -dLoopTest -T8 -b11"
+    },
+    "EntraIntegrated": {
+      "commandName": "Project",
+      "commandLineArgs": "-i -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11"
+    },
+    "EntraInteractive": {
+      "commandName": "Project",
+      "commandLineArgs": "-I -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11"
+    },
+    "EntraServicePrincipal": {
+      "commandName": "Project",
+      "commandLineArgs": "-s -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11 -a{appid} -x{secret}"
+    },
+    "EntraIDDefault": {
+      "commandName": "Project",
+      "commandLineArgs": "-D -Sconnectiontracker.database.windows.net -dLoopTest -T8 -b11"
     }
   }
-}
