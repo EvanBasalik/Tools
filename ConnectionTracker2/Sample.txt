@@ -1,1 +1,23 @@
-connectiontracker -Syourservernamehere -E -H1 -q -Q"your linked server query here"
+//run for an hour, quiet, with query
+connectiontrackereverywhere -Syourservernamehere -dsomedatabase -E -H1 -q -Q"your query here"
+
+//username, password, growing delta, 11 connections in a batch
+connectiontrackereverywhere -U{username} -P{password} -Sconnectiontracker.database.windows.net -dsomedatabase -T8 -F"1.1" -b11
+
+//Windows integrated auth, 8 seconds between loops, 11 connections in a batch
+connectiontrackereverywhere -E -Sconnectiontracker -dsomedatabase -T8 -b11
+
+//Entra ID integrated auth, 8 seconds between loops, 11 connections in a batch
+connectiontrackereverywhere -i -Sconnectiontracker.database.windows.net -dsomedatabase -T8 -b11
+
+//Entra ID interactive auth, 8 seconds between loops, 11 connections in a batch
+connectiontrackereverywhere -I -Sconnectiontracker.database.windows.net -dsomedatabase -T8 -b11
+
+//Entra ID service principal and secret, 8 seconds between loops, 11 connections in a batch
+connectiontrackereverywhere -s -Sconnectiontracker.database.windows.net -dsomedatabase -T8 -b11 -a{appid} -x{secret}
+
+//Entra ID default authentication, 8 seconds between loops, 11 connections in a batch
+connectiontrackereverywhere -D -Sconnectiontracker.database.windows.net -dsomedatabase -T8 -b11
+
+//Entra ID interactive, query, 3 seconds between loops, one connection per batch, enable hidden pooling
+connectiontrackereverywhere -I -Sconnectiontracker.database.windows.net -dsomedatabase -Q"select @@version" -T3 -b1 -p
