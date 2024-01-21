@@ -5,12 +5,14 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
+using ForkPowerPointDeck;
 using System.Collections;
 using System.Net.Security;
 
 string _baseFile = "";
 string _outputFile = "";
 string _mappingFile = "";
+SlideMapping slideMapping = new SlideMapping();
 
 //make sure we have all 3 necessary inputs: baseFile(b), newFile(n), mappingFile(m)
 #if DEBUG
@@ -75,6 +77,9 @@ for (int i = 0; i < args.Length; i++)
                 Console.WriteLine("Mapping file doesn't exist!");
                 Environment.Exit(-1);
             }
+
+            slideMapping.MappingFile = _mappingFile;
+
             break;
         default:
             // Code to handle unknown argument
@@ -83,8 +88,6 @@ for (int i = 0; i < args.Length; i++)
             break;
     }
 }
-
-
 
 //make a copy of the base file
 File.Copy(_baseFile, _outputFile, true);
@@ -120,6 +123,9 @@ for (int slideIndex = 0; slideIndex < presentationPart.SlideParts.Count()-1; sli
 
     //for now, just use some simple logic
     if (slideIndex % 2 == 0) { _remove = true; }
+
+    //more complicated logic
+    slideMapping.MappingItems.Count();
 
     //if the slide needs removed, grab the SlideId and add it to the slidestoDelete arrary
     if (_remove)
