@@ -113,10 +113,10 @@ if (slideIdList is null)
 //this means we have to take a pass through and for each slide in order, compare the index against the mapping,
 //then if it needs to be delete, grab the SlideId and store it so we can loop through again later to delete
 ArrayList slidestoDelete=new ArrayList();
-for (int slideIndex = 0; slideIndex < presentationPart.SlideParts.Count()-1; slideIndex++)
+for (int slideIndex = 1; slideIndex < presentationPart.SlideParts.Count()+1; slideIndex++)
 {
     // Get the slide
-    SlideId? sourceSlide = slideIdList.ChildElements[slideIndex] as SlideId;
+    SlideId? sourceSlide = slideIdList.ChildElements[slideIndex-1] as SlideId;
 
     //decide to keep or delete slide based on the input mapping file
     bool _remove = false;
@@ -125,9 +125,14 @@ for (int slideIndex = 0; slideIndex < presentationPart.SlideParts.Count()-1; sli
     //if (slideIndex % 2 == 0) { _remove = true; }
 
     //if the slide needs removed, grab the SlideId and add it to the slidestoDelete arrary
-    if (!slideMapping.MappingItems[slideIndex+1].KeepSlide)
+    if (!slideMapping.MappingItems[slideIndex-1].KeepSlide)
     {
+        Console.WriteLine($"Marking slide {slideIndex} with slide index {sourceSlide.Id} for removal");
         slidestoDelete.Add(sourceSlide.Id);
+    }
+    else
+    {
+        Console.WriteLine($"Keeping slide {slideIndex} with slide index {sourceSlide.Id}");
     }
 
     }
@@ -142,6 +147,7 @@ foreach (var item in slidestoDelete)
     {
         if (slide.Id == item)
         {
+            Console.WriteLine($"Removing slide {slide.Id}");
             slide.Remove();
             break;
         }

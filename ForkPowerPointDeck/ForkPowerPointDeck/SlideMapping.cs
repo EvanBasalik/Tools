@@ -75,9 +75,11 @@ namespace ForkPowerPointDeck
                             switch (fields[1].ToLowerInvariant())
                             {
                                 case "keep":
+                                    Console.WriteLine($"Tagging slide {_slide.SlideIndex} for keeping");
                                     _slide.KeepSlide = true;
                                     break;
                                 case "remove":
+                                    Console.WriteLine($"Tagging slide {_slide.SlideIndex} for removal");
                                     _slide.KeepSlide = false;
                                     break;
                                 default:
