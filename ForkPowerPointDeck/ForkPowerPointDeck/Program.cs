@@ -147,7 +147,7 @@ for (int slideIndex = 1; slideIndex < presentationPart.SlideParts.Count()+1; sli
     }
     else
     {
-        Console.WriteLine($"Keeping slide {slideIndex} with slide index {sourceSlide.Id}");
+        Console.WriteLine($"Keeping slide {slideIndex} with slide index {sourceSlide.Id}. Slide info: {slideText[0]}");
     }
 
     }
