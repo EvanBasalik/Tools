@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ForkPowerPointDeck": {
+      "commandName": "Project",
+      "commandLineArgs": "-bSampleInputFile\r\n-ooutput\r\n-mSampleMappingFile"
+    }
+  }
+}
