@@ -12,15 +12,17 @@ using System.Net.Security;
 string _baseFile = "";
 string _outputFile = "";
 string _mappingFile = "";
+bool _overwriteOutput = false;
 SlideMapping slideMapping = new SlideMapping();
 
-//make sure we have all 3 necessary inputs: baseFile(b), newFile(n), mappingFile(m)
+//make sure we have all 3 necessary inputs: baseFile(b), outputFile(o), mappingFile(m)
+//and then the optional one for overwrite(w)
 #if DEBUG
 Console.WriteLine("arg count = " + args.Count());
 #endif
-if (args.Count() != 3)
+if (args.Count() < 3)
 {
-    Console.WriteLine("Missing command line parameter!");
+    Console.WriteLine("Missing required command line parameter!");
     Console.WriteLine("-b{baseFile without .pptx}");
     Console.WriteLine("-o{outputFile without .pptx}");
     Console.WriteLine("-m{mappingFileCSV without .csv}");
@@ -48,21 +50,6 @@ for (int i = 0; i < args.Length; i++)
             break;
         case "o":
             _outputFile = args[i].Substring(2) + ".pptx";
-
-#if DEBUG
-            //also tack a date/time on the end just to make iteratively testing easier
-            _outputFile=_outputFile.Replace(".pptx", DateTime.Now.ToString("yyyyMMddHHmmss") + ".pptx");
-
-            Console.WriteLine("outputFile = " + _outputFile);
-#endif
-
-            //since we are overwriting any existing output file with the same name
-            //exit if the target output file already exists
-            if (File.Exists (_outputFile))
-            {
-                Console.WriteLine("Output file already exists!");
-                Environment.Exit(-1);
-            }
             break;
         case "m":
             _mappingFile = args[i].Substring(2) + ".csv";
@@ -81,12 +68,30 @@ for (int i = 0; i < args.Length; i++)
             slideMapping.MappingFile = _mappingFile;
 
             break;
+        case "w":
+            _overwriteOutput = true;
+            break;
         default:
             // Code to handle unknown argument
             Console.WriteLine("Bad input parameter");
             Environment.Exit(-1);
             break;
     }
+}
+
+#if DEBUG
+//tack a date/time on the end just to make iteratively testing easier
+_outputFile = _outputFile.Replace(".pptx", DateTime.Now.ToString("yyyyMMddHHmmss") + ".pptx");
+
+Console.WriteLine("outputFile = " + _outputFile);
+#endif
+
+//since we are overwriting any existing output file with the same name
+//exit if the target output file already exists and w(overWrite) isn't set
+if (!_overwriteOutput && File.Exists(_outputFile))
+{
+    Console.WriteLine("Output file already exists!");
+    Environment.Exit(-1);
 }
 
 //make a copy of the base file
