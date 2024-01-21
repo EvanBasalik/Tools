@@ -10,6 +10,9 @@ namespace ForkPowerPointDeck
 {
     internal class SlideMapping
     {
+
+        public string SlideIdentifyingText="";
+
         private List<MappingItem> _items;
         public List<MappingItem> MappingItems
         {
@@ -75,11 +78,11 @@ namespace ForkPowerPointDeck
                             switch (fields[1].ToLowerInvariant())
                             {
                                 case "keep":
-                                    Console.WriteLine($"Tagging slide {_slide.SlideIndex} for keeping");
+                                    Console.WriteLine($"Per mapping file tagging slide {_slide.SlideIndex} for keeping");
                                     _slide.KeepSlide = true;
                                     break;
                                 case "remove":
-                                    Console.WriteLine($"Tagging slide {_slide.SlideIndex} for removal");
+                                    Console.WriteLine($"Per mapping file tagging slide {_slide.SlideIndex} for removal");
                                     _slide.KeepSlide = false;
                                     break;
                                 default:
@@ -99,9 +102,10 @@ namespace ForkPowerPointDeck
         
     }
 
-    internal class MappingItem
+    public class MappingItem
     {
         public int SlideIndex { get; set; }
         public bool KeepSlide { get; set; }
     }
+
 }
