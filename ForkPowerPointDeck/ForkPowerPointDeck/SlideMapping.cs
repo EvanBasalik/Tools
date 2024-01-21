@@ -21,6 +21,26 @@ namespace ForkPowerPointDeck
                     _items = new List<MappingItem>();
                 }
 
+                return _items;
+            }
+        }
+
+        private string _mappingFile="";
+        public string MappingFile
+        {
+
+            get 
+            {
+                return _mappingFile;
+            }
+
+            set
+            {
+                _mappingFile = value;
+
+                //if the mapping file name is set, clear out the existing collection
+                _items = new List<MappingItem>();
+
                 //if the mapping file location is defined and the collection is null
                 //read in the file and build the mapping
                 if (MappingFile != "")
@@ -55,7 +75,7 @@ namespace ForkPowerPointDeck
                             switch (fields[1].ToLowerInvariant())
                             {
                                 case "keep":
-                                    _slide.KeepSlide= true;
+                                    _slide.KeepSlide = true;
                                     break;
                                 case "remove":
                                     _slide.KeepSlide = false;
@@ -72,25 +92,6 @@ namespace ForkPowerPointDeck
                     }
 
                 }
-                return _items;
-            }
-        }
-
-        private string _mappingFile="";
-        public string MappingFile
-        {
-
-            get 
-            {
-                return _mappingFile;
-            }
-
-            set
-            {
-                _mappingFile = value;
-
-                //if the mapping file name is set, clear out the existing collection
-                _items = null;
             }
         }
         

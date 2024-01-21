@@ -122,18 +122,15 @@ for (int slideIndex = 0; slideIndex < presentationPart.SlideParts.Count()-1; sli
     bool _remove = false;
 
     //for now, just use some simple logic
-    if (slideIndex % 2 == 0) { _remove = true; }
-
-    //more complicated logic
-    slideMapping.MappingItems.Count();
+    //if (slideIndex % 2 == 0) { _remove = true; }
 
     //if the slide needs removed, grab the SlideId and add it to the slidestoDelete arrary
-    if (_remove)
+    if (!slideMapping.MappingItems[slideIndex+1].KeepSlide)
     {
         slidestoDelete.Add(sourceSlide.Id);
     }
 
-}
+    }
 
 //now that we have our list of slidestoDelete,
 //iterate through the slide list and find them one by one
