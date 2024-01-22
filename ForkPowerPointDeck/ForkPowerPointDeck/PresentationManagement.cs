@@ -1,10 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ForkPowerPointDeck
 {
@@ -16,7 +11,7 @@ namespace ForkPowerPointDeck
 
     internal static class PresentationManagement
     {
-        public static string[] GetAllTextInSlide(PresentationDocument presentationDocument, int slideIndex)
+        public static string GetNotesInSlide(PresentationDocument presentationDocument, int slideIndex)
         {
             // Verify that the presentation document exists.
             if (presentationDocument == null)
@@ -57,15 +52,15 @@ namespace ForkPowerPointDeck
                         // Pass the slide part to the next method, and
                         // then return the array of strings that method
                         // returns to the previous method.
-                        return GetAllTextInSlide(slidePart);
+                        return GetNotesInSlide(slidePart);
                     }
                 }
             }
             // Else, return null.
-            return null;
+            return string.Empty;
         }
 
-        public static string[] GetAllTextInSlide(SlidePart slidePart)
+        public static string GetNotesInSlide(SlidePart slidePart)
         {
             // Verify that the slide part exists.
             if (slidePart == null)
@@ -76,40 +71,17 @@ namespace ForkPowerPointDeck
             // Create a new linked list of strings.
             LinkedList<string> texts = new LinkedList<string>();
 
-            // If the slide exists...
-            if (slidePart.Slide != null)
+            // If the notes exist ...
+            var notes = slidePart?.NotesSlidePart?.NotesSlide?.InnerText;
+
+            if (string.IsNullOrWhiteSpace(notes) == false)
             {
-                // Iterate through all the paragraphs in the slide.
-                foreach (var paragraph in slidePart.Slide.Descendants<DocumentFormat.OpenXml.Drawing.Paragraph>())
-                {
-                    // Create a new string builder.                    
-                    StringBuilder paragraphText = new StringBuilder();
-
-                    // Iterate through the lines of the paragraph.
-                    foreach (var text in paragraph.Descendants<DocumentFormat.OpenXml.Drawing.Text>())
-                    {
-                        // Append each line to the previous lines.
-                        paragraphText.Append(text.Text);
-                    }
-
-                    if (paragraphText.Length > 0)
-                    {
-                        // Add each paragraph to the linked list.
-                        texts.AddLast(paragraphText.ToString());
-                    }
-                }
-            }
-
-            if (texts.Count > 0)
-            {
-                // Return an array of strings.
-                return texts.ToArray();
+                return notes;
             }
             else
             {
-                return null;
+                return string.Empty;
             }
         }
-
     }
 }
