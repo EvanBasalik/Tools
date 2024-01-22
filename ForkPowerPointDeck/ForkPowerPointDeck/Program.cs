@@ -1,13 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 //read in the base presentation
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
 using ForkPowerPointDeck;
-using System.Collections;
-using System.Net.Security;
 
 string _baseFile = string.Empty;
 string _outputFile = string.Empty;
@@ -128,7 +124,6 @@ for (int slideIndex = 1; slideIndex < presentationPart.SlideParts.Count()+1; sli
         Console.WriteLine($"Marking slide {slideIndex} with slide index {sourceSlide.Id} for removal.");
         SlideItem _slide = new SlideItem
         {
-            SlideIndex = slideIndex,
             Id = sourceSlide.Id,
             IdentifyingText = slideNotes
         };

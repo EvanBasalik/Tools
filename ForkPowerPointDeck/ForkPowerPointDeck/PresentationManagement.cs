@@ -3,9 +3,9 @@ using DocumentFormat.OpenXml.Presentation;
 
 namespace ForkPowerPointDeck
 {
-    public class SlideItem : MappingItem
+    public class SlideItem
     {
-        public string IdentifyingText = "";
+        public string IdentifyingText = string.Empty;
         public uint Id;
     };
 
@@ -67,9 +67,6 @@ namespace ForkPowerPointDeck
             {
                 throw new ArgumentNullException("slidePart");
             }
-
-            // Create a new linked list of strings.
-            LinkedList<string> texts = new LinkedList<string>();
 
             // If the notes exist ...
             var notes = slidePart?.NotesSlidePart?.NotesSlide?.InnerText;
