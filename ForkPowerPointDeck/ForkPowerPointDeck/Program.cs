@@ -1,21 +1,16 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 //read in the base presentation
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
 using ForkPowerPointDeck;
-using System.Collections;
-using System.Net.Security;
 
-string _baseFile = "";
-string _outputFile = "";
-string _mappingFile = "";
+string _baseFile = string.Empty;
+string _outputFile = string.Empty;
+string _slidesWithIdentifierToKeep = string.Empty;
 bool _overwriteOutput = false;
-SlideMapping slideMapping = new SlideMapping();
 
-//make sure we have all 3 necessary inputs: baseFile(b), outputFile(o), mappingFile(m)
+//make sure we have all 3 necessary inputs: baseFile(b), outputFile(o), identifierToKeep(i)
 //and then the optional one for overwrite(w)
 #if DEBUG
 Console.WriteLine("arg count = " + args.Count());
@@ -25,7 +20,7 @@ if (args.Count() < 3)
     Console.WriteLine("Missing required command line parameter!");
     Console.WriteLine("-b{baseFile without .pptx}");
     Console.WriteLine("-o{outputFile without .pptx}");
-    Console.WriteLine("-m{mappingFileCSV without .csv}");
+    Console.WriteLine("-i{identifier to keep}");
     Environment.Exit(-1);
 }
 
@@ -51,21 +46,12 @@ for (int i = 0; i < args.Length; i++)
         case "o":
             _outputFile = args[i].Substring(2) + ".pptx";
             break;
-        case "m":
-            _mappingFile = args[i].Substring(2) + ".csv";
+        case "i":
+            _slidesWithIdentifierToKeep = args[i].Substring(2);
 
 #if DEBUG
-            Console.WriteLine("mappingFile = " + _mappingFile);
+            Console.WriteLine("identifier to keep  = " + _slidesWithIdentifierToKeep);
 #endif
-
-            //if the mapping file doesn't exist, exit
-            if (!File.Exists(_mappingFile))
-            {
-                Console.WriteLine("Mapping file doesn't exist!");
-                Environment.Exit(-1);
-            }
-
-            slideMapping.MappingFile = _mappingFile;
 
             break;
         case "w":
@@ -77,6 +63,12 @@ for (int i = 0; i < args.Length; i++)
             Environment.Exit(-1);
             break;
     }
+}
+
+if (string.IsNullOrEmpty(_slidesWithIdentifierToKeep))
+{
+    Console.WriteLine("Slides to keep identifier not specified.");
+    Environment.Exit(-1);
 }
 
 #if DEBUG
@@ -113,13 +105,6 @@ if (slideIdList is null)
     throw new ArgumentNullException(nameof(slideIdList));
 }
 
-//then compare the slide count vs. the mapping
-//if we have less mapping entries than slides, bail
-if (slideMapping.MappingItems.Count < presentationPart.SlideParts.Count())
-{
-    throw new Exception("More slides than mappings - check the mapping file");
-}
-
 //unfortunately, no easy way ahead of time to know the slideId
 //therefore, we'll just track which slides to keep/remove by mapping against the order in the deck
 //this means we have to take a pass through and for each slide in order, compare the index against the mapping,
@@ -130,27 +115,26 @@ for (int slideIndex = 1; slideIndex < presentationPart.SlideParts.Count()+1; sli
     // Get the slide
     SlideId? sourceSlide = slideIdList.ChildElements[slideIndex-1] as SlideId;
 
-    string[] slideText=PresentationManagement.GetAllTextInSlide(presentationDocument, slideIndex-1);
+    string slideNotes = PresentationManagement.GetNotesInSlide(presentationDocument, slideIndex-1);
 
     //decide to keep or delete slide based on the input mapping file
     //if the slide needs removed, grab the SlideId and add it to the slidestoDelete arrary
-    if (!slideMapping.MappingItems[slideIndex-1].KeepSlide)
+    if (slideNotes.ToLowerInvariant().Contains(_slidesWithIdentifierToKeep.ToLowerInvariant()) == false)
     {
-        Console.WriteLine($"Marking slide {slideIndex} with slide index {sourceSlide.Id} for removal. Slide info: {slideText[0]}");
+        Console.WriteLine($"Marking slide {slideIndex} with slide index {sourceSlide.Id} for removal.");
         SlideItem _slide = new SlideItem
         {
-            SlideIndex = slideIndex,
             Id = sourceSlide.Id,
-            IdentifyingText = slideText[0]
+            IdentifyingText = slideNotes
         };
         slidestoDelete.Add(_slide);
     }
     else
     {
-        Console.WriteLine($"Keeping slide {slideIndex} with slide index {sourceSlide.Id}. Slide info: {slideText[0]}");
+        Console.WriteLine($"Keeping slide {slideIndex} with slide index {sourceSlide.Id}.");
     }
 
-    }
+ }
 
 //now that we have our list of slidestoDelete,
 //iterate through the slide list and find them one by one
@@ -162,7 +146,7 @@ foreach (var item in slidestoDelete)
     {
         if (slide.Id == item.Id)
         {
-            Console.WriteLine($"Removing slide {slide.Id}. Slide info: {item.IdentifyingText}");
+            Console.WriteLine($"Removing slide {slide.Id}.");
             slide.Remove();
             break;
         }
