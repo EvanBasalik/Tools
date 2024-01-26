@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\ForkPowerPointDeck\SampleInputFile.pptx" Link="SampleInputFile.pptx" />
+    <None Include="..\ForkPowerPointDeck\SampleInputFile.pptx" Link="SampleInputFile.pptx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

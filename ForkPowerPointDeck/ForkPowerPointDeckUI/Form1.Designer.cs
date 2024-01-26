@@ -31,7 +31,7 @@
             chkOverwrite = new CheckBox();
             txtBaseFile = new TextBox();
             lstIdentifiers = new ListBox();
-            openFileDialog1 = new OpenFileDialog();
+            openFileDialog = new OpenFileDialog();
             txtOutputFolder = new TextBox();
             label1 = new Label();
             label2 = new Label();
@@ -74,10 +74,6 @@
             lstIdentifiers.Name = "lstIdentifiers";
             lstIdentifiers.Size = new Size(448, 291);
             lstIdentifiers.TabIndex = 2;
-            // 
-            // openFileDialog1
-            // 
-            openFileDialog1.FileName = "openFileDialog1";
             // 
             // txtOutputFolder
             // 
@@ -214,6 +210,7 @@
             Controls.Add(chkOverwrite);
             Name = "Form1";
             Text = "ForkPowerPointDeck";
+            FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ResumeLayout(false);
             PerformLayout();
@@ -224,7 +221,7 @@
         private CheckBox chkOverwrite;
         private TextBox txtBaseFile;
         private ListBox lstIdentifiers;
-        private OpenFileDialog openFileDialog1;
+        private OpenFileDialog openFileDialog;
         private TextBox txtOutputFolder;
         private Label label1;
         private Label label2;

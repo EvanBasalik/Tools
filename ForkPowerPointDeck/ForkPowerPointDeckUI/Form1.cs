@@ -64,11 +64,12 @@ namespace ForkPowerPointDeckUI
         private void btnBaseFile_Click(object sender, EventArgs e)
         {
             //filter to just show PowerPoint files
-            openFileDialog1.Filter = "PowerPoint Files|*.ppt;*.pptx";
-            openFileDialog1.ShowDialog(this);
+            openFileDialog.Filter = "PowerPoint Files|*.ppt;*.pptx";
+            openFileDialog.InitialDirectory = Environment.CurrentDirectory;
+            openFileDialog.ShowDialog(this);
 
             //grab the selected file and store it as the base file
-            strBaseFile = openFileDialog1.FileName.ToString();
+            strBaseFile = openFileDialog.FileName.ToString();
             txtBaseFile.Text = strBaseFile;
         }
 
@@ -77,11 +78,12 @@ namespace ForkPowerPointDeckUI
             //browse for a folder
             using (var dialog = new FolderBrowserDialog())
             {
+                dialog.InitialDirectory = Environment.CurrentDirectory;
                 DialogResult result = dialog.ShowDialog();
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
                 {
                     txtOutputFolder.Text = dialog.SelectedPath;
-                    strOutputFolder = dialog.SelectedPath; 
+                    strOutputFolder = dialog.SelectedPath;
                 }
             }
         }
@@ -115,11 +117,14 @@ namespace ForkPowerPointDeckUI
 
                 //get the currently selected identifier
                 strIdentifier = lstIdentifiers.SelectedItem.ToString();
-    
-                if (strBaseFile != string.Empty && strOutputFile != string.Empty 
+
+                if (strBaseFile != string.Empty && strOutputFile != string.Empty
                         && strIdentifier != string.Empty && strOutputFolder != string.Empty)
                 {
                     PresentationManagement.ForkPresentation(strBaseFile, strOutputFileandFolder, strIdentifier, overwriteOutputFile);
+
+                    //force the progress report to scroll to the bottom
+                    txtProgress.ScrollToCaret();
                 }
                 else
                 {
@@ -150,6 +155,11 @@ namespace ForkPowerPointDeckUI
                 MessageBox.Show("Unable to fork deck!", "Fork Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.Save();
         }
     }
 }
