@@ -119,7 +119,7 @@ namespace ForkPowerPointDeckUI
                 if (strBaseFile != string.Empty && strOutputFile != string.Empty 
                         && strIdentifier != string.Empty && strOutputFolder != string.Empty)
                 {
-                    PresentationManagement.ForkPresentation(strBaseFile, strOutputFile, strIdentifier, overwriteOutputFile);
+                    PresentationManagement.ForkPresentation(strBaseFile, strOutputFileandFolder, strIdentifier, overwriteOutputFile);
                 }
                 else
                 {
