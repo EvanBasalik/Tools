@@ -74,16 +74,15 @@ namespace ForkPowerPointDeckUI
 
         private void btnOutputFolder_Click(object sender, EventArgs e)
         {
-            //filter to show just folders
-            openFileDialog1.Filter = "Folders|.";
-            openFileDialog1.ShowDialog(this);
-
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            //browse for a folder
+            using (var dialog = new FolderBrowserDialog())
             {
-                string folderPath = Path.GetDirectoryName(openFileDialog1.FileName);
-
-                //grab the selected folder
-                strOutputFolder = folderPath;
+                DialogResult result = dialog.ShowDialog();
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
+                {
+                    txtOutputFolder.Text = dialog.SelectedPath;
+                    strOutputFolder = dialog.SelectedPath; 
+                }
             }
         }
 
@@ -113,9 +112,12 @@ namespace ForkPowerPointDeckUI
             {
                 //merge the output folder and file
                 strOutputFileandFolder = Path.Combine(strOutputFolder, strOutputFile);
+
+                //get the currently selected identifier
+                strIdentifier = lstIdentifiers.SelectedItem.ToString();
     
-                if (strBaseFile != string.Empty && strOutputFileandFolder != string.Empty 
-                        && strIdentifier != string.Empty)
+                if (strBaseFile != string.Empty && strOutputFile != string.Empty 
+                        && strIdentifier != string.Empty && strOutputFolder != string.Empty)
                 {
                     PresentationManagement.ForkPresentation(strBaseFile, strOutputFile, strIdentifier, overwriteOutputFile);
                 }

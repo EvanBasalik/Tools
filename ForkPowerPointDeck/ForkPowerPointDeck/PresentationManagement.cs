@@ -97,6 +97,12 @@ namespace ForkPowerPointDeck
                 string _slidesWithIdentifierToKeep = identifierToKeep;
                 bool _overwriteOutput = overwriteOutput;
 
+                //make sure we have a .pptx extension
+                if (!(_outputFile.Contains(".pptx") | _outputFile.Contains(".ppt")))
+                {
+                    _outputFile = _outputFile + ".pptx";
+                }
+
 #if DEBUG
                 //tack a date/time on the end just to make iteratively testing easier
                 _outputFile = _outputFile.Replace(".pptx", DateTime.Now.ToString("yyyyMMddHHmmss") + ".pptx");
