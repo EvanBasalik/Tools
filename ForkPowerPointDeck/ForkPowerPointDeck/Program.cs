@@ -11,8 +11,9 @@ bool _overwriteOutput = false;
 //make sure we have all 3 necessary inputs: baseFile(b), outputFile(o), identifierToKeep(i)
 //and then the optional one for overwrite(w)
 #if DEBUG
-Console.WriteLine("arg count = " + args.Count());
+    Console.WriteLine("arg count = " + args.Count());
 #endif
+
 if (args.Count() < 3)
 {
     Console.WriteLine("Missing required command line parameter!");

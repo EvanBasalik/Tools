@@ -115,7 +115,7 @@ namespace ForkPowerPointDeck
                 if (!_overwriteOutput && File.Exists(_outputFile))
                 {
                     Console.WriteLine("Output file already exists!");
-                    Environment.Exit(-1);
+                    return false;
                 }
 
                 //make a copy of the base file

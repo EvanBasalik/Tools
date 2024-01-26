@@ -112,6 +112,9 @@ namespace ForkPowerPointDeckUI
         {
             try
             {
+                //clear the progress box
+                txtProgress.Clear();
+
                 //merge the output folder and file
                 strOutputFileandFolder = Path.Combine(strOutputFolder, strOutputFile);
 
