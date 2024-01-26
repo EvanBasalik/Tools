@@ -3,7 +3,7 @@ using DocumentFormat.OpenXml.Presentation;
 
 namespace ForkPowerPointDeck
 {
-    public class SlideItem
+    internal class SlideItem
     {
         public string IdentifyingText = string.Empty;
         public uint Id;

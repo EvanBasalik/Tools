@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ForkPowerPointDeck\PresentationManagement.cs" Link="PresentationManagement.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\ForkPowerPointDeck\SampleInputFile.pptx" Link="SampleInputFile.pptx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.1" />
+  </ItemGroup>
+
+</Project>

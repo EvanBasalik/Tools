@@ -1,8 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 //read in the base presentation
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Presentation;
 using ForkPowerPointDeck;
 
 string _baseFile = string.Empty;
