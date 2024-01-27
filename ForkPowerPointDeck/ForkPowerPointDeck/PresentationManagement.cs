@@ -1,9 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
-using DocumentFormat.OpenXml.Presentation;
-using DocumentFormat.OpenXml.Drawing;
-using Shape = DocumentFormat.OpenXml.Presentation.Shape;
-using DocumentFormat.OpenXml.Office.Drawing;
 
 namespace ForkPowerPointDeck
 {
@@ -30,7 +26,7 @@ namespace ForkPowerPointDeck
             }
 
             // Get the presentation part of the presentation document.
-            PresentationPart presentationPart = presentationDocument.PresentationPart;
+            PresentationPart ?presentationPart = presentationDocument.PresentationPart;
 
             // Verify that the presentation part and presentation exist.
             if (presentationPart != null && presentationPart.Presentation != null)
@@ -48,15 +44,24 @@ namespace ForkPowerPointDeck
                     if (slideIndex < slideIds.Count)
                     {
                         // Get the relationship ID of the slide.
-                        string slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
+                        string ?slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
 
-                        // Get the specified slide part from the relationship ID.
-                        SlidePart slidePart = (SlidePart)presentationPart.GetPartById(slidePartRelationshipId);
+                        if (slidePartRelationshipId != null) 
+                        {
+                            // Get the specified slide part from the relationship ID.
+                            SlidePart slidePart = (SlidePart)presentationPart.GetPartById(slidePartRelationshipId);
 
-                        // Pass the slide part to the next method, and
-                        // then return the array of strings that method
-                        // returns to the previous method.
-                        return GetNotesInSlide(slidePart);
+                            // Pass the slide part to the next method, and
+                            // then return the array of strings that method
+                            // returns to the previous method.
+                            return GetNotesInSlide(slidePart);
+                        }
+                        else
+                        {
+                            return string.Empty;
+                        }
+
+
                     }
                 }
             }
@@ -102,7 +107,7 @@ namespace ForkPowerPointDeck
             }
 
             // Get the presentation part of the presentation document.
-            PresentationPart presentationPart = presentationDocument.PresentationPart;
+            PresentationPart ?presentationPart = presentationDocument.PresentationPart;
 
             // Verify that the presentation part and presentation exist.
             if (presentationPart != null && presentationPart.Presentation != null)
@@ -120,16 +125,22 @@ namespace ForkPowerPointDeck
                     if (slideIndex < slideIds.Count)
                     {
                         // Get the relationship ID of the slide.
-                        string slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
+                        string ?slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
 
-                        // Get the specified slide part from the relationship ID.
-                        SlidePart slidePart = (SlidePart)presentationPart.GetPartById(slidePartRelationshipId);
-
-                        //loop through all the pictures in the slidePart
-                        foreach (DocumentFormat.OpenXml.Presentation.Picture item in slidePart.Slide.Descendants<DocumentFormat.OpenXml.Presentation.Picture>())
+                        if (slidePartRelationshipId != null)
                         {
-                            Console.WriteLine($"Found and removing a cameo with the name {item.NonVisualPictureProperties.NonVisualDrawingProperties.Name} on slide {slideIndex}");
-                            item.Remove();
+                            // Get the specified slide part from the relationship ID.
+                            SlidePart slidePart = (SlidePart)presentationPart.GetPartById(slidePartRelationshipId);
+
+                            //loop through all the pictures in the slidePart
+                            foreach (DocumentFormat.OpenXml.Presentation.Picture item in slidePart.Slide.Descendants<DocumentFormat.OpenXml.Presentation.Picture>())
+                            {
+                                if (item != null)
+                                {
+                                    Console.WriteLine($"Found and removing a cameo with the name    {item.NonVisualPictureProperties.NonVisualDrawingProperties.Name} on slide {slideIndex}");
+                                    item.Remove();
+                                }
+                            }
                         }
                     }
                 }

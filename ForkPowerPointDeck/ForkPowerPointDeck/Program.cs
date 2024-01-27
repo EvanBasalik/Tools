@@ -76,7 +76,6 @@ if (string.IsNullOrEmpty(_slidesWithIdentifierToKeep))
     Environment.Exit(-1);
 }
 
-_removeCameos = false;
 if (!PresentationManagement.ForkPresentation(_baseFile, _outputFile, _slidesWithIdentifierToKeep, _overwriteOutput, _removeCameos))
 {
     Console.WriteLine("Error forking presentation");
