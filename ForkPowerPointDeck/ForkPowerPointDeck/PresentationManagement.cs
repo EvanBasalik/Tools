@@ -135,7 +135,8 @@ namespace ForkPowerPointDeck
                             //loop through all the pictures in the slidePart
                             foreach (DocumentFormat.OpenXml.Presentation.Picture item in slidePart.Slide.Descendants<DocumentFormat.OpenXml.Presentation.Picture>())
                             {
-                                if (item != null)
+                                //only remove if is a Cameo picture. We can tell because the name has "Camera" in it
+                                if (item != null && item.NonVisualPictureProperties.NonVisualDrawingProperties.Name.ToString().Contains("Camera"))
                                 {
                                     Console.WriteLine($"Found and removing a cameo with the name    {item.NonVisualPictureProperties.NonVisualDrawingProperties.Name} on slide {slideIndex}");
                                     item.Remove();
@@ -240,7 +241,7 @@ namespace ForkPowerPointDeck
                     //if removeCameos = true, remove cameo from the slide
                     if (removeCameos)
                     {
-                        RemoveCameoInSlide(presentationDocument, slideIndex - 1);
+                            RemoveCameoInSlide(presentationDocument, slideIndex-1);
                     }
 
                 }
@@ -267,6 +268,8 @@ namespace ForkPowerPointDeck
 
                 //save the doc
                 presentationDocument.Save();
+
+                presentationDocument.Dispose();
 
                 _result = true;
             }
