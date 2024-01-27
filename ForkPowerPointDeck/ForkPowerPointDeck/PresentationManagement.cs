@@ -60,7 +60,7 @@ namespace ForkPowerPointDeck
                     }
                 }
             }
-            // Else, return null.
+            // Else, return empty string
             return string.Empty;
         }
 
@@ -85,8 +85,10 @@ namespace ForkPowerPointDeck
             }
         }
 
-        public static string RemoveCameoInSlide(PresentationDocument presentationDocument, int slideIndex)
+        public static bool RemoveCameoInSlide(PresentationDocument presentationDocument, int slideIndex)
         {
+            bool _result = false;
+
             // Verify that the presentation document exists.
             if (presentationDocument == null)
             {
@@ -123,43 +125,23 @@ namespace ForkPowerPointDeck
                         // Get the specified slide part from the relationship ID.
                         SlidePart slidePart = (SlidePart)presentationPart.GetPartById(slidePartRelationshipId);
 
-                        // Get the shape tree of the slide layout part.
-                        Slide slide = slidePart.Slide;
-
-                        DocumentFormat.OpenXml.Presentation.ShapeTree shapeTree = slide.CommonSlideData.ShapeTree;
-
-
-                        //DocumentFormat.OpenXml.Presentation.Picture pic;
-                        //foreach (var item in shapeTree)
-                        //{
-                        //    if (item.InnerXml.Contains("camera"))
-                        //    {
-                        //        pic = (DocumentFormat.OpenXml.Presentation.Picture) item;
-                        //        shapeTree.RemoveChild(pic);
-
-                        //        break;
-                        //    }
-                        //}
-
-                        DocumentFormat.OpenXml.Presentation.Picture imageToRemove = slidePart.Slide.Descendants<DocumentFormat.OpenXml.Presentation.Picture>().SingleOrDefault(picture => picture.InnerText.Contains("Camera"));
-
+                        //loop through all the pictures in the slidePart
                         foreach (DocumentFormat.OpenXml.Presentation.Picture item in slidePart.Slide.Descendants<DocumentFormat.OpenXml.Presentation.Picture>())
                         {
-                            Console.WriteLine(item.InnerText);
+                            Console.WriteLine($"Found and removing a cameo with the name {item.NonVisualPictureProperties.NonVisualDrawingProperties.Name} on slide {slideIndex}");
                             item.Remove();
                         }
-
-
-
                     }
                 }
             }
-            // Else, return null.
             presentationDocument.Save();
-            return string.Empty;
+            
+            _result = true;
+
+            return _result;
         }
 
-        public static bool ForkPresentation(string baseFile, string outputFile, string identifierToKeep, bool overwriteOutput)
+        public static bool ForkPresentation(string baseFile, string outputFile, string identifierToKeep, bool overwriteOutput, bool removeCameos)
         {
 
             bool _result = false;
@@ -244,8 +226,11 @@ namespace ForkPowerPointDeck
                         Console.WriteLine($"Keeping slide {slideIndex} with slide index {sourceSlide.Id}.");
                     }
 
-                    //remove cameo from the slide
-                    RemoveCameoInSlide(presentationDocument, slideIndex-1);
+                    //if removeCameos = true, remove cameo from the slide
+                    if (removeCameos)
+                    {
+                        RemoveCameoInSlide(presentationDocument, slideIndex - 1);
+                    }
 
                 }
 
@@ -282,37 +267,6 @@ namespace ForkPowerPointDeck
 
             return _result;
         }
-
-static void RemoveCameo (PresentationDocument presentationDocument)
-{
-    // Get the presentation part of the document.
-    PresentationPart presentationPart = presentationDocument.PresentationPart;
-
-    // Get the slide master part of the document.
-    SlideMasterPart slideMasterPart = presentationPart.SlideMasterParts.FirstOrDefault();
-
-    // Get the slide layout part of the slide master part.
-    SlideLayoutPart slideLayoutPart = slideMasterPart.SlideLayoutParts.FirstOrDefault();
-
-    // Get the shape tree of the slide layout part.
-    DocumentFormat.OpenXml.Presentation.ShapeTree shapeTree = slideLayoutPart.SlideLayout.CommonSlideData.ShapeTree;
-
-            foreach (var item in shapeTree)
-            {
-
-                    Console.WriteLine(item.InnerXml);
-                
-            }
-
-    // Remove the cameo shape from the shape tree.
-    //if (cameoShape != null)
-    //{
-    //    cameoShape.Remove();
-    //}
-
-// Save the changes to the presentation document.
-presentationDocument.Save();
-}
 
     }
 }

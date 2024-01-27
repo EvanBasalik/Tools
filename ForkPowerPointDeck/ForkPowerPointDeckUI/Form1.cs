@@ -13,6 +13,7 @@ namespace ForkPowerPointDeckUI
         string strIdentifier = string.Empty;
         bool overwriteOutputFile = false;
         string strOutputFileandFolder = string.Empty;
+        bool removeCameos = false;
 
         public Form1()
         {
@@ -124,7 +125,7 @@ namespace ForkPowerPointDeckUI
                 if (strBaseFile != string.Empty && strOutputFile != string.Empty
                         && strIdentifier != string.Empty && strOutputFolder != string.Empty)
                 {
-                    PresentationManagement.ForkPresentation(strBaseFile, strOutputFileandFolder, strIdentifier, overwriteOutputFile);
+                    PresentationManagement.ForkPresentation(strBaseFile, strOutputFileandFolder, strIdentifier, overwriteOutputFile, removeCameos);
 
                     //force the progress report to scroll to the bottom
                     txtProgress.ScrollToCaret();
@@ -163,6 +164,11 @@ namespace ForkPowerPointDeckUI
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.Save();
+        }
+
+        private void chkRemoveCameos_CheckedChanged(object sender, EventArgs e)
+        {
+            removeCameos = chkRemoveCameos.Checked;
         }
     }
 }

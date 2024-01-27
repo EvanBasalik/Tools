@@ -7,6 +7,7 @@ string _baseFile = string.Empty;
 string _outputFile = string.Empty;
 string _slidesWithIdentifierToKeep = string.Empty;
 bool _overwriteOutput = false;
+bool _removeCameos = false;
 
 //make sure we have all 3 necessary inputs: baseFile(b), outputFile(o), identifierToKeep(i)
 //and then the optional one for overwrite(w)
@@ -54,7 +55,12 @@ for (int i = 0; i < args.Length; i++)
 
             break;
         case "w":
+            Console.WriteLine("will overwrite output file");
             _overwriteOutput = true;
+            break;
+        case "c":
+            Console.WriteLine("will remove cameos");
+            _removeCameos = true;
             break;
         default:
             // Code to handle unknown argument
@@ -70,7 +76,8 @@ if (string.IsNullOrEmpty(_slidesWithIdentifierToKeep))
     Environment.Exit(-1);
 }
 
-if (!PresentationManagement.ForkPresentation(_baseFile, _outputFile, _slidesWithIdentifierToKeep, _overwriteOutput))
+_removeCameos = false;
+if (!PresentationManagement.ForkPresentation(_baseFile, _outputFile, _slidesWithIdentifierToKeep, _overwriteOutput, _removeCameos))
 {
     Console.WriteLine("Error forking presentation");
     Environment.Exit(-1);

@@ -44,12 +44,13 @@
             txtOutputFile = new TextBox();
             btnFork = new Button();
             txtProgress = new TextBox();
+            chkRemoveCameos = new CheckBox();
             SuspendLayout();
             // 
             // chkOverwrite
             // 
             chkOverwrite.AutoSize = true;
-            chkOverwrite.Location = new Point(264, 331);
+            chkOverwrite.Location = new Point(280, 307);
             chkOverwrite.Name = "chkOverwrite";
             chkOverwrite.Size = new Size(439, 45);
             chkOverwrite.TabIndex = 0;
@@ -188,11 +189,23 @@
             txtProgress.Size = new Size(894, 167);
             txtProgress.TabIndex = 14;
             // 
+            // chkRemoveCameos
+            // 
+            chkRemoveCameos.AutoSize = true;
+            chkRemoveCameos.Location = new Point(280, 368);
+            chkRemoveCameos.Name = "chkRemoveCameos";
+            chkRemoveCameos.Size = new Size(291, 45);
+            chkRemoveCameos.TabIndex = 15;
+            chkRemoveCameos.Text = "Remove Cameos?";
+            chkRemoveCameos.UseVisualStyleBackColor = true;
+            chkRemoveCameos.CheckedChanged += chkRemoveCameos_CheckedChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(17F, 41F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1429, 772);
+            Controls.Add(chkRemoveCameos);
             Controls.Add(txtProgress);
             Controls.Add(btnFork);
             Controls.Add(label3);
@@ -234,5 +247,6 @@
         private TextBox txtOutputFile;
         private Button btnFork;
         private TextBox txtProgress;
+        private CheckBox chkRemoveCameos;
     }
 }
