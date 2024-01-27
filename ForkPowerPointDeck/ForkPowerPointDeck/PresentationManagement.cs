@@ -1,5 +1,9 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
+using DocumentFormat.OpenXml.Presentation;
+using DocumentFormat.OpenXml.Drawing;
+using Shape = DocumentFormat.OpenXml.Presentation.Shape;
+using DocumentFormat.OpenXml.Office.Drawing;
 
 namespace ForkPowerPointDeck
 {
@@ -79,6 +83,80 @@ namespace ForkPowerPointDeck
             {
                 return string.Empty;
             }
+        }
+
+        public static string RemoveCameoInSlide(PresentationDocument presentationDocument, int slideIndex)
+        {
+            // Verify that the presentation document exists.
+            if (presentationDocument == null)
+            {
+                throw new ArgumentNullException("presentationDocument");
+            }
+
+            // Verify that the slide index is not out of range.
+            if (slideIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException("slideIndex");
+            }
+
+            // Get the presentation part of the presentation document.
+            PresentationPart presentationPart = presentationDocument.PresentationPart;
+
+            // Verify that the presentation part and presentation exist.
+            if (presentationPart != null && presentationPart.Presentation != null)
+            {
+                // Get the Presentation object from the presentation part.
+                Presentation presentation = presentationPart.Presentation;
+
+                // Verify that the slide ID list exists.
+                if (presentation.SlideIdList != null)
+                {
+                    // Get the collection of slide IDs from the slide ID list.
+                    var slideIds = presentation.SlideIdList.ChildElements;
+
+                    // If the slide ID is in range...
+                    if (slideIndex < slideIds.Count)
+                    {
+                        // Get the relationship ID of the slide.
+                        string slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
+
+                        // Get the specified slide part from the relationship ID.
+                        SlidePart slidePart = (SlidePart)presentationPart.GetPartById(slidePartRelationshipId);
+
+                        // Get the shape tree of the slide layout part.
+                        Slide slide = slidePart.Slide;
+
+                        DocumentFormat.OpenXml.Presentation.ShapeTree shapeTree = slide.CommonSlideData.ShapeTree;
+
+
+                        //DocumentFormat.OpenXml.Presentation.Picture pic;
+                        //foreach (var item in shapeTree)
+                        //{
+                        //    if (item.InnerXml.Contains("camera"))
+                        //    {
+                        //        pic = (DocumentFormat.OpenXml.Presentation.Picture) item;
+                        //        shapeTree.RemoveChild(pic);
+
+                        //        break;
+                        //    }
+                        //}
+
+                        DocumentFormat.OpenXml.Presentation.Picture imageToRemove = slidePart.Slide.Descendants<DocumentFormat.OpenXml.Presentation.Picture>().SingleOrDefault(picture => picture.InnerText.Contains("Camera"));
+
+                        foreach (DocumentFormat.OpenXml.Presentation.Picture item in slidePart.Slide.Descendants<DocumentFormat.OpenXml.Presentation.Picture>())
+                        {
+                            Console.WriteLine(item.InnerText);
+                            item.Remove();
+                        }
+
+
+
+                    }
+                }
+            }
+            // Else, return null.
+            presentationDocument.Save();
+            return string.Empty;
         }
 
         public static bool ForkPresentation(string baseFile, string outputFile, string identifierToKeep, bool overwriteOutput)
@@ -166,6 +244,9 @@ namespace ForkPowerPointDeck
                         Console.WriteLine($"Keeping slide {slideIndex} with slide index {sourceSlide.Id}.");
                     }
 
+                    //remove cameo from the slide
+                    RemoveCameoInSlide(presentationDocument, slideIndex-1);
+
                 }
 
                 //now that we have our list of slidestoDelete,
@@ -201,5 +282,37 @@ namespace ForkPowerPointDeck
 
             return _result;
         }
+
+static void RemoveCameo (PresentationDocument presentationDocument)
+{
+    // Get the presentation part of the document.
+    PresentationPart presentationPart = presentationDocument.PresentationPart;
+
+    // Get the slide master part of the document.
+    SlideMasterPart slideMasterPart = presentationPart.SlideMasterParts.FirstOrDefault();
+
+    // Get the slide layout part of the slide master part.
+    SlideLayoutPart slideLayoutPart = slideMasterPart.SlideLayoutParts.FirstOrDefault();
+
+    // Get the shape tree of the slide layout part.
+    DocumentFormat.OpenXml.Presentation.ShapeTree shapeTree = slideLayoutPart.SlideLayout.CommonSlideData.ShapeTree;
+
+            foreach (var item in shapeTree)
+            {
+
+                    Console.WriteLine(item.InnerXml);
+                
+            }
+
+    // Remove the cameo shape from the shape tree.
+    //if (cameoShape != null)
+    //{
+    //    cameoShape.Remove();
+    //}
+
+// Save the changes to the presentation document.
+presentationDocument.Save();
+}
+
     }
 }
