@@ -2,7 +2,7 @@
   "profiles": {
     "ForkPowerPointDeck": {
       "commandName": "Project",
-      "commandLineArgs": "-bSampleInputFile\r\n-ooutput\r\n-i{Scenario1}"
+      "commandLineArgs": "-bSampleInputFile\r\n-ooutput\r\n-i{Scenario1}\r\n-c"
     }
   }
 }
