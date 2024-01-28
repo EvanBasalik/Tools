@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             chkOverwrite = new CheckBox();
             txtBaseFile = new TextBox();
             lstIdentifiers = new ListBox();
@@ -50,11 +51,11 @@
             // chkOverwrite
             // 
             chkOverwrite.AutoSize = true;
-            chkOverwrite.Location = new Point(280, 307);
+            chkOverwrite.Location = new Point(1058, 355);
             chkOverwrite.Name = "chkOverwrite";
-            chkOverwrite.Size = new Size(439, 45);
-            chkOverwrite.TabIndex = 0;
-            chkOverwrite.Text = "Overwrite existing output file";
+            chkOverwrite.Size = new Size(294, 45);
+            chkOverwrite.TabIndex = 7;
+            chkOverwrite.Text = "Overwrite existing";
             chkOverwrite.UseVisualStyleBackColor = true;
             chkOverwrite.CheckedChanged += chkOverwrite_CheckedChanged;
             // 
@@ -62,25 +63,24 @@
             // 
             txtBaseFile.Location = new Point(280, 52);
             txtBaseFile.Name = "txtBaseFile";
-            txtBaseFile.Size = new Size(756, 47);
+            txtBaseFile.Size = new Size(1528, 47);
             txtBaseFile.TabIndex = 1;
             txtBaseFile.TextChanged += txtBaseFile_TextChanged;
             // 
             // lstIdentifiers
             // 
-            lstIdentifiers.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lstIdentifiers.FormattingEnabled = true;
             lstIdentifiers.ItemHeight = 41;
-            lstIdentifiers.Location = new Point(32, 445);
+            lstIdentifiers.Location = new Point(33, 566);
             lstIdentifiers.Name = "lstIdentifiers";
-            lstIdentifiers.Size = new Size(448, 291);
-            lstIdentifiers.TabIndex = 2;
+            lstIdentifiers.Size = new Size(865, 250);
+            lstIdentifiers.TabIndex = 6;
             // 
             // txtOutputFolder
             // 
-            txtOutputFolder.Location = new Point(280, 140);
+            txtOutputFolder.Location = new Point(280, 199);
             txtOutputFolder.Name = "txtOutputFolder";
-            txtOutputFolder.Size = new Size(756, 47);
+            txtOutputFolder.Size = new Size(1528, 47);
             txtOutputFolder.TabIndex = 3;
             txtOutputFolder.TextChanged += txtOutputFolder_TextChanged;
             // 
@@ -96,7 +96,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(25, 143);
+            label2.Location = new Point(25, 202);
             label2.Name = "label2";
             label2.Size = new Size(249, 41);
             label2.TabIndex = 5;
@@ -104,59 +104,56 @@
             // 
             // btnAdd
             // 
-            btnAdd.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            btnAdd.Location = new Point(782, 445);
+            btnAdd.Location = new Point(371, 436);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(254, 106);
-            btnAdd.TabIndex = 6;
+            btnAdd.TabIndex = 12;
             btnAdd.Text = "Add new identifier";
             btnAdd.UseVisualStyleBackColor = true;
             btnAdd.Click += btnAdd_Click;
             // 
             // btnDelete
             // 
-            btnDelete.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            btnDelete.Location = new Point(505, 445);
+            btnDelete.Location = new Point(644, 436);
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(254, 106);
-            btnDelete.TabIndex = 7;
+            btnDelete.TabIndex = 11;
             btnDelete.Text = "Delete Identifier";
             btnDelete.UseVisualStyleBackColor = true;
             btnDelete.Click += btnDelete_Click;
             // 
             // btnBaseFile
             // 
-            btnBaseFile.Location = new Point(1058, 46);
+            btnBaseFile.Location = new Point(280, 119);
             btnBaseFile.Name = "btnBaseFile";
             btnBaseFile.Size = new Size(345, 58);
-            btnBaseFile.TabIndex = 8;
-            btnBaseFile.Text = "Select Base File";
+            btnBaseFile.TabIndex = 2;
+            btnBaseFile.Text = "Select Base File...";
             btnBaseFile.UseVisualStyleBackColor = true;
             btnBaseFile.Click += btnBaseFile_Click;
             // 
             // btnOutputFolder
             // 
-            btnOutputFolder.Location = new Point(1058, 134);
+            btnOutputFolder.Location = new Point(280, 268);
             btnOutputFolder.Name = "btnOutputFolder";
             btnOutputFolder.Size = new Size(345, 58);
-            btnOutputFolder.TabIndex = 9;
-            btnOutputFolder.Text = "Select Output Folder";
+            btnOutputFolder.TabIndex = 4;
+            btnOutputFolder.Text = "Select Output Folder...";
             btnOutputFolder.UseVisualStyleBackColor = true;
             btnOutputFolder.Click += btnOutputFolder_Click;
             // 
             // txtNewIdentifier
             // 
-            txtNewIdentifier.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            txtNewIdentifier.Location = new Point(1058, 475);
+            txtNewIdentifier.Location = new Point(33, 466);
             txtNewIdentifier.Name = "txtNewIdentifier";
-            txtNewIdentifier.Size = new Size(345, 47);
+            txtNewIdentifier.Size = new Size(323, 47);
             txtNewIdentifier.TabIndex = 10;
             txtNewIdentifier.Text = "{}";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(25, 232);
+            label3.Location = new Point(25, 356);
             label3.Name = "label3";
             label3.Size = new Size(173, 41);
             label3.TabIndex = 12;
@@ -164,38 +161,40 @@
             // 
             // txtOutputFile
             // 
-            txtOutputFile.Location = new Point(280, 229);
+            txtOutputFile.Location = new Point(280, 353);
             txtOutputFile.Name = "txtOutputFile";
             txtOutputFile.Size = new Size(756, 47);
-            txtOutputFile.TabIndex = 11;
+            txtOutputFile.TabIndex = 5;
             txtOutputFile.TextChanged += txtOutputFile_TextChanged;
             // 
             // btnFork
             // 
-            btnFork.Location = new Point(1058, 232);
+            btnFork.Image = (Image)resources.GetObject("btnFork.Image");
+            btnFork.Location = new Point(1358, 295);
             btnFork.Name = "btnFork";
-            btnFork.Size = new Size(345, 192);
-            btnFork.TabIndex = 13;
-            btnFork.Text = "Fork!";
+            btnFork.Size = new Size(450, 230);
+            btnFork.TabIndex = 9;
             btnFork.UseVisualStyleBackColor = true;
             btnFork.Click += btnFork_Click;
             // 
             // txtProgress
             // 
-            txtProgress.Location = new Point(509, 569);
+            txtProgress.BackColor = SystemColors.ControlLight;
+            txtProgress.Location = new Point(924, 566);
             txtProgress.Multiline = true;
             txtProgress.Name = "txtProgress";
             txtProgress.ScrollBars = ScrollBars.Both;
-            txtProgress.Size = new Size(894, 167);
+            txtProgress.Size = new Size(884, 250);
             txtProgress.TabIndex = 14;
+            txtProgress.TabStop = false;
             // 
             // chkRemoveCameos
             // 
             chkRemoveCameos.AutoSize = true;
-            chkRemoveCameos.Location = new Point(280, 368);
+            chkRemoveCameos.Location = new Point(1058, 453);
             chkRemoveCameos.Name = "chkRemoveCameos";
             chkRemoveCameos.Size = new Size(291, 45);
-            chkRemoveCameos.TabIndex = 15;
+            chkRemoveCameos.TabIndex = 8;
             chkRemoveCameos.Text = "Remove Cameos?";
             chkRemoveCameos.UseVisualStyleBackColor = true;
             chkRemoveCameos.CheckedChanged += chkRemoveCameos_CheckedChanged;
@@ -204,7 +203,7 @@
             // 
             AutoScaleDimensions = new SizeF(17F, 41F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1429, 772);
+            ClientSize = new Size(1846, 833);
             Controls.Add(chkRemoveCameos);
             Controls.Add(txtProgress);
             Controls.Add(btnFork);
@@ -221,6 +220,7 @@
             Controls.Add(lstIdentifiers);
             Controls.Add(txtBaseFile);
             Controls.Add(chkOverwrite);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
             Text = "ForkPowerPointDeck";
             FormClosing += Form1_FormClosing;
