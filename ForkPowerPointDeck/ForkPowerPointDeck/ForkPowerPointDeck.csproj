@@ -6,10 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Trimming>full</Trimming>
+    <ApplicationIcon>fork.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="SampleInputFile - Copy.pptx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="fork.ico" />
   </ItemGroup>
 
   <ItemGroup>
