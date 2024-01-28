@@ -1,5 +1,10 @@
 Given a PowerPoint document, it will iterate through all the slides in a PowerPoint deck and remove the unwanted ones.  It looks for the specified identifier in each slide's `Notes` field to determine which slides to keep.  This is great for keeping a single master deck while being able to create forks of that deck on demand for special sessions.
 
+There is an EXE for commandline execution and a WinForms UI.
+
+![image](https://github.com/EvanBasalik/Tools/assets/4534993/d3ab8ec6-ec2d-4311-baa0-db9b323278a0)
+
+
 # Input parameters:
 **-b{baseFile without .pptx}** = input deck  
 **-o{outputFile without .pptx}** = name for output file  
