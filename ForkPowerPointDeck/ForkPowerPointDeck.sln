@@ -5,7 +5,9 @@ VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForkPowerPointDeck", "ForkPowerPointDeck\ForkPowerPointDeck.csproj", "{E9D37DCB-5613-475D-A766-D0D843A2F158}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForkPowerPointDeckUI", "ForkPowerPointDeckUI\ForkPowerPointDeckUI.csproj", "{C977DB8C-A176-4AC1-9D94-A79484C77E26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForkPowerPointDeckUI", "ForkPowerPointDeckUI\ForkPowerPointDeckUI.csproj", "{C977DB8C-A176-4AC1-9D94-A79484C77E26}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Publish", "Publish", "{345A9304-FEFD-4F34-9035-651A7AC06F69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
