@@ -169,12 +169,13 @@
             // 
             // btnFork
             // 
+            btnFork.BackColor = Color.FromArgb(255, 128, 0);
             btnFork.Image = (Image)resources.GetObject("btnFork.Image");
-            btnFork.Location = new Point(1358, 295);
+            btnFork.Location = new Point(1525, 352);
             btnFork.Name = "btnFork";
-            btnFork.Size = new Size(450, 230);
+            btnFork.Size = new Size(283, 146);
             btnFork.TabIndex = 9;
-            btnFork.UseVisualStyleBackColor = true;
+            btnFork.UseVisualStyleBackColor = false;
             btnFork.Click += btnFork_Click;
             // 
             // txtProgress
