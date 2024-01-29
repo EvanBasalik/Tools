@@ -46,6 +46,7 @@
             btnFork = new Button();
             txtProgress = new TextBox();
             chkRemoveCameos = new CheckBox();
+            chkRemoveComments = new CheckBox();
             SuspendLayout();
             // 
             // chkOverwrite
@@ -192,7 +193,7 @@
             // chkRemoveCameos
             // 
             chkRemoveCameos.AutoSize = true;
-            chkRemoveCameos.Location = new Point(1058, 453);
+            chkRemoveCameos.Location = new Point(1058, 417);
             chkRemoveCameos.Name = "chkRemoveCameos";
             chkRemoveCameos.Size = new Size(291, 45);
             chkRemoveCameos.TabIndex = 8;
@@ -200,11 +201,24 @@
             chkRemoveCameos.UseVisualStyleBackColor = true;
             chkRemoveCameos.CheckedChanged += chkRemoveCameos_CheckedChanged;
             // 
+            // chkRemoveComments
+            // 
+            chkRemoveComments.AutoSize = true;
+            chkRemoveComments.Checked = true;
+            chkRemoveComments.CheckState = CheckState.Checked;
+            chkRemoveComments.Location = new Point(1058, 479);
+            chkRemoveComments.Name = "chkRemoveComments";
+            chkRemoveComments.Size = new Size(329, 45);
+            chkRemoveComments.TabIndex = 15;
+            chkRemoveComments.Text = "Remove Comments?";
+            chkRemoveComments.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(17F, 41F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1846, 833);
+            Controls.Add(chkRemoveComments);
             Controls.Add(chkRemoveCameos);
             Controls.Add(txtProgress);
             Controls.Add(btnFork);
@@ -249,5 +263,6 @@
         private Button btnFork;
         private TextBox txtProgress;
         private CheckBox chkRemoveCameos;
+        private CheckBox chkRemoveComments;
     }
 }

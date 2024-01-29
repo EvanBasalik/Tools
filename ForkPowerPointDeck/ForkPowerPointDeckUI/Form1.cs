@@ -125,7 +125,7 @@ namespace ForkPowerPointDeckUI
                 if (strBaseFile != string.Empty && strOutputFile != string.Empty
                         && strIdentifier != string.Empty && strOutputFolder != string.Empty)
                 {
-                    PresentationManagement.ForkPresentation(strBaseFile, strOutputFileandFolder, strIdentifier, overwriteOutputFile, removeCameos);
+                    PresentationManagement.ForkPresentation(strBaseFile, strOutputFileandFolder, strIdentifier, overwriteOutputFile, removeCameos, chkRemoveComments.Checked);
 
                     //force the progress report to scroll to the bottom
                     txtProgress.ScrollToCaret();
