@@ -139,7 +139,7 @@ namespace ForkPowerPointDeck
                                 //only remove if is a Cameo picture. We can tell because the name has "Camera" in it
                                 if (item != null && item.NonVisualPictureProperties.NonVisualDrawingProperties.Name.ToString().Contains("Camera"))
                                 {
-                                    Console.WriteLine($"Found and removing a cameo with the name    {item.NonVisualPictureProperties.NonVisualDrawingProperties.Name} on slide {slideIndex}");
+                                    Console.WriteLine($"Found and removing a cameo with the name    {item.NonVisualPictureProperties.NonVisualDrawingProperties.Name} on slide {slidePart.Slide.InnerText}");
                                     item.Remove();
                                 }
                             }
@@ -338,6 +338,7 @@ namespace ForkPowerPointDeck
                                         {
                                             // Delete each comment
                                             slideCommentPart.CommentList.RemoveChild(comm);
+                                            Console.WriteLine($"Deleted a comment on slide {slidePart.Slide.InnerText}");
                                         }
 
                                         // If the commentPart has no existing comments, then delete the slideCommentPart
