@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Packaging;
+﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
 
 namespace ForkPowerPointDeck
@@ -11,7 +12,7 @@ namespace ForkPowerPointDeck
 
     internal static class PresentationManagement
     {
-        public static string GetNotesInSlide(PresentationDocument presentationDocument, int slideIndex)
+        internal static string GetNotesInSlide(PresentationDocument presentationDocument, int slideIndex)
         {
             // Verify that the presentation document exists.
             if (presentationDocument == null)
@@ -26,7 +27,7 @@ namespace ForkPowerPointDeck
             }
 
             // Get the presentation part of the presentation document.
-            PresentationPart ?presentationPart = presentationDocument.PresentationPart;
+            PresentationPart? presentationPart = presentationDocument.PresentationPart;
 
             // Verify that the presentation part and presentation exist.
             if (presentationPart != null && presentationPart.Presentation != null)
@@ -44,9 +45,9 @@ namespace ForkPowerPointDeck
                     if (slideIndex < slideIds.Count)
                     {
                         // Get the relationship ID of the slide.
-                        string ?slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
+                        string? slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
 
-                        if (slidePartRelationshipId != null) 
+                        if (slidePartRelationshipId != null)
                         {
                             // Get the specified slide part from the relationship ID.
                             SlidePart slidePart = (SlidePart)presentationPart.GetPartById(slidePartRelationshipId);
@@ -69,7 +70,7 @@ namespace ForkPowerPointDeck
             return string.Empty;
         }
 
-        public static string GetNotesInSlide(SlidePart slidePart)
+        internal static string GetNotesInSlide(SlidePart slidePart)
         {
             // Verify that the slide part exists.
             if (slidePart == null)
@@ -90,7 +91,7 @@ namespace ForkPowerPointDeck
             }
         }
 
-        public static bool RemoveCameoInSlide(PresentationDocument presentationDocument, int slideIndex)
+        internal static bool RemoveCameoInSlide(PresentationDocument presentationDocument, int slideIndex)
         {
             bool _result = false;
 
@@ -107,7 +108,7 @@ namespace ForkPowerPointDeck
             }
 
             // Get the presentation part of the presentation document.
-            PresentationPart ?presentationPart = presentationDocument.PresentationPart;
+            PresentationPart? presentationPart = presentationDocument.PresentationPart;
 
             // Verify that the presentation part and presentation exist.
             if (presentationPart != null && presentationPart.Presentation != null)
@@ -125,7 +126,7 @@ namespace ForkPowerPointDeck
                     if (slideIndex < slideIds.Count)
                     {
                         // Get the relationship ID of the slide.
-                        string ?slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
+                        string? slidePartRelationshipId = (slideIds[slideIndex] as SlideId).RelationshipId;
 
                         if (slidePartRelationshipId != null)
                         {
@@ -147,13 +148,13 @@ namespace ForkPowerPointDeck
                 }
             }
             presentationDocument.Save();
-            
+
             _result = true;
 
             return _result;
         }
 
-        public static bool ForkPresentation(string baseFile, string outputFile, string identifierToKeep, bool overwriteOutput, bool removeCameos)
+        public static bool ForkPresentation(string baseFile, string outputFile, string identifierToKeep, bool overwriteOutput, bool removeCameos, bool removeComments)
         {
 
             bool _result = false;
@@ -241,7 +242,7 @@ namespace ForkPowerPointDeck
                     //if removeCameos = true, remove cameo from the slide
                     if (removeCameos)
                     {
-                            RemoveCameoInSlide(presentationDocument, slideIndex-1);
+                        RemoveCameoInSlide(presentationDocument, slideIndex - 1);
                     }
 
                 }
@@ -263,6 +264,11 @@ namespace ForkPowerPointDeck
                     }
                 }
 
+                if (removeComments)
+                {
+                    DeleteComments(presentationDocument);
+                }
+
                 //save the presentation to the doc
                 presentation.Save();
 
@@ -278,6 +284,81 @@ namespace ForkPowerPointDeck
 
                 throw;
             }
+
+            return _result;
+        }
+
+        // Remove all the comments in the slides.
+        internal static bool DeleteComments(PresentationDocument presentationDocument)
+        {
+            bool _result = false;
+
+            try
+            {
+                // Verify that the presentation document exists.
+                if (presentationDocument == null)
+                {
+                    throw new ArgumentNullException("presentationDocument");
+                }
+
+                // Get the presentation part of the presentation document.
+                PresentationPart? presentationPart = presentationDocument.PresentationPart;
+
+                // Verify that the presentation part and presentation exist.
+                if (presentationPart != null && presentationPart.Presentation != null)
+                {
+
+                    IEnumerable<SlidePart>? slideParts = presentationPart?.SlideParts;
+
+                    // If there's no slide parts, return.
+                    if (slideParts is null)
+                    {
+                        return false;
+                    }
+
+                    // Iterate through all the slides and get the slide parts.
+                    foreach (SlidePart slidePart in slideParts)
+                    {
+
+                        //iterate through all the parts
+                        foreach (var part in slidePart.Parts)
+                        {
+                            //find the comment part
+                            if (part.OpenXmlPart.ContentType == "application/vnd.ms-powerpoint.comments+xml")
+                            {
+
+                                // Get the OpenXmlPart object and conver to PowerPointCommentPart
+                                PowerPointCommentPart slideCommentPart = (PowerPointCommentPart) part.OpenXmlPart;
+                                {
+                                    // Get the list of comments.
+                                    if (slideCommentPart is not null)
+                                    {
+                                        //for some reason, have to use the Office2021 class
+                                        foreach (DocumentFormat.OpenXml.Office2021.PowerPoint.Comment.Comment comm in slideCommentPart.CommentList)
+                                        {
+                                            // Delete each comment
+                                            slideCommentPart.CommentList.RemoveChild(comm);
+                                        }
+
+                                        // If the commentPart has no existing comments, then delete the slideCommentPart
+                                        if (slideCommentPart.CommentList.ChildElements.Count == 0)
+                                            // Delete this part.
+                                            slidePart.DeletePart(slideCommentPart);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                        _result = true;
+                    }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
 
             return _result;
         }
