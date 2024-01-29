@@ -139,7 +139,7 @@ namespace ForkPowerPointDeck
                                 //only remove if is a Cameo picture. We can tell because the name has "Camera" in it
                                 if (item != null && item.NonVisualPictureProperties.NonVisualDrawingProperties.Name.ToString().Contains("Camera"))
                                 {
-                                    Console.WriteLine($"Found and removing a cameo with the name    {item.NonVisualPictureProperties.NonVisualDrawingProperties.Name} on slide {slidePart.Slide.InnerText}");
+                                    Console.WriteLine($"Found and removing a cameo with the name    {item.NonVisualPictureProperties.NonVisualDrawingProperties.Name} on slide {slidePart.Uri.ToString().Split("/").Last().Split(".")[0].ToLowerInvariant().Replace("slide", "")}");
                                     item.Remove();
                                 }
                             }
@@ -226,7 +226,7 @@ namespace ForkPowerPointDeck
                     //if the slide needs removed, grab the SlideId and add it to the slidestoDelete arrary
                     if (slideNotes.ToLowerInvariant().Contains(_slidesWithIdentifierToKeep.ToLowerInvariant()) == false)
                     {
-                        Console.WriteLine($"Marking slide {slideIndex} with slide index {sourceSlide.Id} for removal.");
+                        Console.WriteLine($"Marking slide {presentationPart.SlideParts.ElementAt<SlidePart>(slideIndex-1).Uri.ToString().Split("/").Last().Split(".")[0].ToLowerInvariant().Replace("slide", "")} with slide index {sourceSlide.Id} for removal.");
                         SlideItem _slide = new SlideItem
                         {
                             Id = sourceSlide.Id,
@@ -236,7 +236,7 @@ namespace ForkPowerPointDeck
                     }
                     else
                     {
-                        Console.WriteLine($"Keeping slide {slideIndex} with slide index {sourceSlide.Id}.");
+                        Console.WriteLine($"Keeping slide {presentationPart.SlideParts.ElementAt<SlidePart>(slideIndex-1).Uri.ToString().Split("/").Last().Split(".")[0].ToLowerInvariant().Replace("slide", "")} with slide index {sourceSlide.Id}.");
                     }
 
                     //if removeCameos = true, remove cameo from the slide
@@ -338,7 +338,7 @@ namespace ForkPowerPointDeck
                                         {
                                             // Delete each comment
                                             slideCommentPart.CommentList.RemoveChild(comm);
-                                            Console.WriteLine($"Deleted a comment on slide {slidePart.Slide.InnerText}");
+                                            Console.WriteLine($"Deleted a comment on slide {slidePart.Uri.ToString().Split("/").Last().Split(".")[0].ToLowerInvariant().Replace("slide", "")}");
                                         }
 
                                         // If the commentPart has no existing comments, then delete the slideCommentPart
