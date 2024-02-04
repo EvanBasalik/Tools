@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Office2010.PowerPoint;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
 
@@ -154,7 +155,55 @@ namespace ForkPowerPointDeck
             return _result;
         }
 
-        public static bool ForkPresentation(string baseFile, string outputFile, string identifierToKeep, bool overwriteOutput, bool removeCameos, bool removeComments)
+        //leveraging the section deletion code from https://github.com/ShapeCrawler/ShapeCrawler/discussions/239
+        internal static bool DeleteSections(PresentationDocument presentationDocument)
+        {
+            bool _result = false;
+
+            try
+            {
+
+                var sectionList = presentationDocument.PresentationPart!.Presentation.PresentationExtensionList?.Descendants<SectionList>().First();
+
+                if (sectionList == null)
+                {
+                    _result = true; // presentation doesn't have sections
+                }
+
+                List<Section> emptySectionList = new List<Section>();
+
+                // Create list of empty sections
+                foreach (Section section in sectionList)
+                {
+                    var isEmptySection = section.SectionSlideIdList.Count() == 0 ? true : false;
+
+                    if (isEmptySection)
+                    {
+                        emptySectionList.Add(section);
+                        Console.WriteLine($"Tagging section {section.Name} for removal");
+
+                    }
+                }
+
+                // Remove empty sections
+                foreach (var item in emptySectionList)
+                {
+                    sectionList.RemoveChild(item);
+                    Console.WriteLine($"Removed section: {item.Name}");
+                }
+
+                _result = true;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return _result;
+        }
+
+        public static bool ForkPresentation(string baseFile, string outputFile, string identifierToKeep, bool overwriteOutput, bool removeCameos, bool removeComments, bool removeEmptySections)
         {
 
             bool _result = false;
@@ -264,9 +313,16 @@ namespace ForkPowerPointDeck
                     }
                 }
 
+                //Remove all comments in the deck
                 if (removeComments)
                 {
                     DeleteComments(presentationDocument);
+                }
+
+                //find and remove any empty sections
+                if (removeEmptySections)
+                {
+                    DeleteSections(presentationDocument);
                 }
 
                 //save the presentation to the doc
@@ -276,6 +332,7 @@ namespace ForkPowerPointDeck
                 presentationDocument.Save();
 
                 presentationDocument.Dispose();
+
 
                 _result = true;
             }
