@@ -219,7 +219,7 @@ namespace ForkPowerPointDeck
                 string _slidesWithIdentifierToKeep = identifierToKeep;
                 bool _overwriteOutput = overwriteOutput;
 
-                //make sure we have a .pptx extension
+                //make sure we have either a .ppt or .pptx extension. If neither, tack in a .pptx
                 if (!(_outputFile.Contains(".pptx") | _outputFile.Contains(".ppt")))
                 {
                     _outputFile = _outputFile + ".pptx";
