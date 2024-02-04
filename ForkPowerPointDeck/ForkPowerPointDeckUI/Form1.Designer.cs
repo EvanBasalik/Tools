@@ -47,16 +47,17 @@
             txtProgress = new TextBox();
             chkRemoveCameos = new CheckBox();
             chkRemoveComments = new CheckBox();
+            chkRemoveEmptySections = new CheckBox();
             SuspendLayout();
             // 
             // chkOverwrite
             // 
             chkOverwrite.AutoSize = true;
-            chkOverwrite.Location = new Point(1058, 355);
+            chkOverwrite.Location = new Point(1058, 358);
             chkOverwrite.Name = "chkOverwrite";
-            chkOverwrite.Size = new Size(294, 45);
+            chkOverwrite.Size = new Size(452, 45);
             chkOverwrite.TabIndex = 7;
-            chkOverwrite.Text = "Overwrite existing";
+            chkOverwrite.Text = "Overwrite existing output file?";
             chkOverwrite.UseVisualStyleBackColor = true;
             chkOverwrite.CheckedChanged += chkOverwrite_CheckedChanged;
             // 
@@ -72,7 +73,7 @@
             // 
             lstIdentifiers.FormattingEnabled = true;
             lstIdentifiers.ItemHeight = 41;
-            lstIdentifiers.Location = new Point(33, 566);
+            lstIdentifiers.Location = new Point(33, 626);
             lstIdentifiers.Name = "lstIdentifiers";
             lstIdentifiers.Size = new Size(865, 250);
             lstIdentifiers.TabIndex = 6;
@@ -105,7 +106,7 @@
             // 
             // btnAdd
             // 
-            btnAdd.Location = new Point(371, 436);
+            btnAdd.Location = new Point(371, 480);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(254, 106);
             btnAdd.TabIndex = 12;
@@ -115,7 +116,7 @@
             // 
             // btnDelete
             // 
-            btnDelete.Location = new Point(644, 436);
+            btnDelete.Location = new Point(644, 480);
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(254, 106);
             btnDelete.TabIndex = 11;
@@ -145,7 +146,7 @@
             // 
             // txtNewIdentifier
             // 
-            txtNewIdentifier.Location = new Point(33, 466);
+            txtNewIdentifier.Location = new Point(33, 510);
             txtNewIdentifier.Name = "txtNewIdentifier";
             txtNewIdentifier.Size = new Size(323, 47);
             txtNewIdentifier.TabIndex = 10;
@@ -182,7 +183,7 @@
             // txtProgress
             // 
             txtProgress.BackColor = SystemColors.ControlLight;
-            txtProgress.Location = new Point(924, 566);
+            txtProgress.Location = new Point(924, 626);
             txtProgress.Multiline = true;
             txtProgress.Name = "txtProgress";
             txtProgress.ScrollBars = ScrollBars.Both;
@@ -193,7 +194,7 @@
             // chkRemoveCameos
             // 
             chkRemoveCameos.AutoSize = true;
-            chkRemoveCameos.Location = new Point(1058, 417);
+            chkRemoveCameos.Location = new Point(1058, 422);
             chkRemoveCameos.Name = "chkRemoveCameos";
             chkRemoveCameos.Size = new Size(291, 45);
             chkRemoveCameos.TabIndex = 8;
@@ -206,18 +207,31 @@
             chkRemoveComments.AutoSize = true;
             chkRemoveComments.Checked = true;
             chkRemoveComments.CheckState = CheckState.Checked;
-            chkRemoveComments.Location = new Point(1058, 479);
+            chkRemoveComments.Location = new Point(1058, 486);
             chkRemoveComments.Name = "chkRemoveComments";
-            chkRemoveComments.Size = new Size(329, 45);
+            chkRemoveComments.Size = new Size(324, 45);
             chkRemoveComments.TabIndex = 15;
-            chkRemoveComments.Text = "Remove Comments?";
+            chkRemoveComments.Text = "Remove comments?";
             chkRemoveComments.UseVisualStyleBackColor = true;
+            // 
+            // chkRemoveEmptySections
+            // 
+            chkRemoveEmptySections.AutoSize = true;
+            chkRemoveEmptySections.Checked = true;
+            chkRemoveEmptySections.CheckState = CheckState.Checked;
+            chkRemoveEmptySections.Location = new Point(1058, 550);
+            chkRemoveEmptySections.Name = "chkRemoveEmptySections";
+            chkRemoveEmptySections.Size = new Size(385, 45);
+            chkRemoveEmptySections.TabIndex = 16;
+            chkRemoveEmptySections.Text = "Remove empty sections?";
+            chkRemoveEmptySections.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(17F, 41F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1846, 833);
+            ClientSize = new Size(1846, 887);
+            Controls.Add(chkRemoveEmptySections);
             Controls.Add(chkRemoveComments);
             Controls.Add(chkRemoveCameos);
             Controls.Add(txtProgress);
@@ -264,5 +278,6 @@
         private TextBox txtProgress;
         private CheckBox chkRemoveCameos;
         private CheckBox chkRemoveComments;
+        private CheckBox chkRemoveEmptySections;
     }
 }
