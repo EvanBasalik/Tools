@@ -180,7 +180,7 @@ namespace ForkPowerPointDeck
                     if (isEmptySection)
                     {
                         emptySectionList.Add(section);
-                        Console.WriteLine($"Tagging section {section.Name} for removal");
+                        Console.WriteLine($"Tagging section \"{section.Name}\" for removal");
 
                     }
                 }
