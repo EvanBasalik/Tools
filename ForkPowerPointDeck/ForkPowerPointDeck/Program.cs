@@ -50,26 +50,19 @@ for (int i = 0; i < args.Length; i++)
             break;
         case "i":
             _slidesWithIdentifierToKeep = args[i].Substring(2);
-
-#if DEBUG
             Console.WriteLine("identifier to keep  = " + _slidesWithIdentifierToKeep);
-#endif
-
             break;
         case "w":
             Console.WriteLine("will overwrite output file");
             _overwriteOutput = true;
             break;
         case "c":
-            Console.WriteLine("will remove cameos");
             _removeCameos = true;
             break;
         case "a":
-            Console.WriteLine("Will NOT remove comments by all authors");
             _removeComments = false;
             break;
         case "s":
-            Console.WriteLine("Will NOT remove empty sections");
             _removeEmptySections = false;
             break;
         default:
@@ -85,6 +78,40 @@ if (string.IsNullOrEmpty(_slidesWithIdentifierToKeep))
     Console.WriteLine("Slides to keep identifier not specified.");
     Environment.Exit(-1);
 }
+
+//remove the Cameos behavior
+switch (_removeCameos)
+{
+    case true:
+        Console.WriteLine("Will remove cameos");
+        break;
+    case false:
+        Console.WriteLine("Will NOT remove cameos");
+        break;
+}
+
+//report the comments behavior
+switch (_removeComments)
+{
+    case false:
+        Console.WriteLine("Will NOT remove comments by all authors");
+        break;
+    case true:
+        Console.WriteLine("Will remove comments by all authors");
+        break;
+}
+
+//remote the empty sections behavior
+switch (_removeEmptySections)
+{
+    case false:
+        Console.WriteLine("Will NOT remove empty sections");
+        break;
+    case true:
+        Console.WriteLine("Will remove empty sections");
+        break;
+}
+
 
 if (!PresentationManagement.ForkPresentation(_baseFile, _outputFile, _slidesWithIdentifierToKeep, _overwriteOutput, _removeCameos, _removeComments, _removeEmptySections))
 {
