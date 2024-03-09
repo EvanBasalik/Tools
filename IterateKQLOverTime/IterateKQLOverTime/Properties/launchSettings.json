@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "IterateKQLOverTime": {
+      "commandName": "Project",
+      "commandLineArgs": "--startYear=2007 --startMonth=2 --endYear=2007 --endMonth=3 --targetClusterURI=https://help.kusto.windows.net/ --targetDatabase=Samples --kqlFile=SampleIterativeQuery.kql --debug=true"
+    }
+  }
+}
