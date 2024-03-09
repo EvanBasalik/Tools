@@ -13,9 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="IterativeQuery.kql">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="SampleIterativeQuery.kql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
