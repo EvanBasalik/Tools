@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <None Update="SampleIterativeQuery.kql">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
