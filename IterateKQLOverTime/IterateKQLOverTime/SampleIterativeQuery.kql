@@ -1,0 +1,11 @@
+﻿let startTime=todatetime("$startTime$");
+let endTime=todatetime("$endTime$");
+StormEvents
+//| where StartTime > todatetime("2007-3-1") and EndTime < todatetime("2007-5-30") //should return all results March 2007-May 2007 inclusive
+//| where StartTime > todatetime("2007-2-1") and EndTime < todatetime("2007-3-31") //should return all results Feb 2007-March 2007 inclusive
+| where StartTime > startTime and EndTime < endTime //should return all results Feb 2007-March 2007 inclusive
+| where EventType == 'Tornado'  
+| extend TotalDamage = DamageProperty + DamageCrops
+| summarize DailyDamage=sum(TotalDamage) by State, bin(StartTime, 1d)
+| where DailyDamage > 100000000
+| order by DailyDamage desc
