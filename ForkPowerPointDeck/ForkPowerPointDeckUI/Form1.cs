@@ -26,6 +26,14 @@ namespace ForkPowerPointDeckUI
         private void Form1_Load(object sender, EventArgs e)
         {
             //load the list of stored identifiers and bind to lstIdentifiers
+            
+            //if not already present from a previous run, add the special case scenario of {KeepAll}
+            //this will allow us to clean up cameos and empty sections without deleting any slides
+            if (Properties.Settings.Default.Identifiers.IndexOf(PresentationManagement.KeepAllSlidesIdentifier) == -1)
+            {
+                Properties.Settings.Default.Identifiers.Add(PresentationManagement.KeepAllSlidesIdentifier);
+            }
+
             lstIdentifiers.DataSource = Properties.Settings.Default.Identifiers;
         }
 
@@ -53,7 +61,15 @@ namespace ForkPowerPointDeckUI
         {
             if (lstIdentifiers.SelectedIndex >= 0)
             {
-                Properties.Settings.Default.Identifiers.Remove(lstIdentifiers.SelectedItem.ToString());
+                //only allow the removal if not the special indentifier KeepAllSlides
+                if (lstIdentifiers.SelectedItem.ToString() != PresentationManagement.KeepAllSlidesIdentifier)
+                {
+                    Properties.Settings.Default.Identifiers.Remove(lstIdentifiers.SelectedItem.ToString());
+                }
+                else
+                {
+                    MessageBox.Show($"Cannot delete special identifier {PresentationManagement.KeepAllSlidesIdentifier}", "Special identifier", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }
 
                 //bounce the datasource to force a refresh in the UI
                 lstIdentifiers.DataSource = null;

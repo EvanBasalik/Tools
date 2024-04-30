@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Presentation;
 
 namespace ForkPowerPointDeck
 {
+
     internal class SlideItem
     {
         public string IdentifyingText = string.Empty;
@@ -13,6 +14,8 @@ namespace ForkPowerPointDeck
 
     internal static class PresentationManagement
     {
+        public static readonly string KeepAllSlidesIdentifier = "{KeepAllSlides}";
+
         internal static string GetNotesInSlide(PresentationDocument presentationDocument, int slideIndex)
         {
             // Verify that the presentation document exists.
@@ -273,19 +276,23 @@ namespace ForkPowerPointDeck
 
                     //decide to keep or delete slide based on the input mapping file
                     //if the slide needs removed, grab the SlideId and add it to the slidestoDelete arrary
-                    if (slideNotes.ToLowerInvariant().Contains(_slidesWithIdentifierToKeep.ToLowerInvariant()) == false)
+                    //for the special case of KeepAllSlides, just jump out of the if and right to the cameo removal
+                    if (_slidesWithIdentifierToKeep != KeepAllSlidesIdentifier)
                     {
-                        Console.WriteLine($"Marking slide {presentationPart.SlideParts.ElementAt<SlidePart>(slideIndex-1).Uri.ToString().Split("/").Last().Split(".")[0].ToLowerInvariant().Replace("slide", "")} with slide index {sourceSlide.Id} for removal.");
-                        SlideItem _slide = new SlideItem
+                        if (slideNotes.ToLowerInvariant().Contains(_slidesWithIdentifierToKeep.ToLowerInvariant()) == false)
                         {
-                            Id = sourceSlide.Id,
-                            IdentifyingText = slideNotes
-                        };
-                        slidestoDelete.Add(_slide);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Keeping slide {presentationPart.SlideParts.ElementAt<SlidePart>(slideIndex-1).Uri.ToString().Split("/").Last().Split(".")[0].ToLowerInvariant().Replace("slide", "")} with slide index {sourceSlide.Id}.");
+                            Console.WriteLine($"Marking slide {presentationPart.SlideParts.ElementAt<SlidePart>(slideIndex - 1).Uri.ToString().Split("/").Last().Split(".")[0].ToLowerInvariant().Replace("slide", "")} with slide index {sourceSlide.Id} for removal.");
+                            SlideItem _slide = new SlideItem
+                            {
+                                Id = sourceSlide.Id,
+                                IdentifyingText = slideNotes
+                            };
+                            slidestoDelete.Add(_slide);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Keeping slide {presentationPart.SlideParts.ElementAt<SlidePart>(slideIndex - 1).Uri.ToString().Split("/").Last().Split(".")[0].ToLowerInvariant().Replace("slide", "")} with slide index {sourceSlide.Id}.");
+                        }
                     }
 
                     //if removeCameos = true, remove cameo from the slide
