@@ -74,7 +74,6 @@ resource natPublicIp 'Microsoft.Network/publicIPAddresses@2022-07-01' = {
     }
 }
 
-// NAT Gateway resource
 resource natGateway 'Microsoft.Network/natGateways@2022-07-01' = {
     name: natGatewayName
     location: location
@@ -89,4 +88,20 @@ resource natGateway 'Microsoft.Network/natGateways@2022-07-01' = {
         ]
     }
 }
+
+// Associate NAT Gateway with subnet1 in the VNet
+resource subnet1WithNat 'Microsoft.Network/virtualNetworks/subnets@2022-07-01' = {
+    name: '${vnet.name}/${subnet1Name}'
+    properties: {
+        addressPrefix: subnet1Prefix
+        natGateway: {
+            id: natGateway.id
+        }
+    }
+    dependsOn: [
+        vnet
+        natGateway
+    ]
+}
+
 
