@@ -1,0 +1,25 @@
+@description('Name of the resource group')
+param resourceGroupName string = 'myResourceGroup'
+
+@description('Location for all resources')
+param location string = 'eastus'
+
+@description('Prefix for storage account names (must be 3-18 chars, lowercase, numbers only)')
+param prefix string = 'mystorageacct'
+
+@description('Number of storage accounts to create')
+param storageAccountCount int = 60
+
+var storageAccounts = [for i in range(1, storageAccountCount + 1): {
+    name: '${prefix}${i < 10 ? '0${i}' : i}'
+}]
+
+resource storageAccountsRes 'Microsoft.Storage/storageAccounts@2022-09-01' = [for sa in storageAccounts: {
+    name: sa.name
+    location: location
+    sku: {
+        name: 'Standard_LRS'
+    }
+    kind: 'StorageV2'
+    properties: {}
+}]
