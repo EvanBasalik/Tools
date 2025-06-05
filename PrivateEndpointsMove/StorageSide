@@ -1,16 +1,13 @@
-@description('Name of the resource group')
-param resourceGroupName string = 'myResourceGroup'
-
 @description('Location for all resources')
-param location string = 'eastus'
+param location string = resourceGroup().location
 
 @description('Prefix for storage account names (must be 3-18 chars, lowercase, numbers only)')
-param prefix string = 'mystorageacct'
+param prefix string = 'evanbamystorageacct'
 
 @description('Number of storage accounts to create')
-param storageAccountCount int = 60
+param storageAccountCount int = 15
 
-var storageAccounts = [for i in range(1, storageAccountCount + 1): {
+var storageAccounts = [for i in range(1, storageAccountCount): {
     name: '${prefix}${i < 10 ? '0${i}' : i}'
 }]
 

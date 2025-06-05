@@ -2,11 +2,10 @@
 param location string = resourceGroup().location
 param vnetName string = 'myVnet'
 param subnet1Name string = 'subnet1'
-param subnet2Name string = 'subnet2'
+param subnet2Name string = 'private-endpoints-subnet'
 param subnet1Prefix string = '10.0.1.0/24'
 param subnet2Prefix string = '10.0.2.0/24'
 param vnetAddressPrefix string = '10.0.0.0/16'
-param privateEndpointCount int = 60
 
 // NAT Gateway parameters
 param natGatewayName string = 'myNatGateway'
@@ -38,29 +37,6 @@ resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' = {
         ]
     }
 }
-
-// Loop to create 60 private endpoints in subnet1
-resource privateEndpoints 'Microsoft.Network/privateEndpoints@2022-09-01' = [for i in range(0, privateEndpointCount): {
-    name: 'pe-${i}'
-    location: location
-    properties: {
-        subnet: {
-            id: vnet.properties.subnets[0].id
-        }
-        // Add your private link service connection properties here
-        privateLinkServiceConnections: [
-            {
-                name: 'plsConnection${i}'
-                properties: {
-                    privateLinkServiceId: '<your-private-link-service-id>'
-                    groupIds: [
-                        '<group-id>'
-                    ]
-                }
-            }
-        ]
-    }
-}]
 
 // Public IP for NAT Gateway
 resource natPublicIp 'Microsoft.Network/publicIPAddresses@2022-07-01' = {
