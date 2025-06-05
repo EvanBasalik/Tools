@@ -16,7 +16,7 @@ for ($i = 1; $i -le $links_to_create; $i++) {
     if ($i -le 9) {
         $sa = "$($unique_id)mystorageacct0$($i)"
     } else {
-        $sa = "($unique_id)mystorageacct$($i)"
+        $sa = "$($unique_id)mystorageacct$($i)"
     }
 
     Write-Host "Processing storage account: $sa"
