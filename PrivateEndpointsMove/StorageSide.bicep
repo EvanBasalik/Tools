@@ -5,7 +5,7 @@ param location string = resourceGroup().location
 param prefix string = 'evanbamystorageacct'
 
 @description('Number of storage accounts to create')
-param storageAccountCount int = 15
+param storageAccountCount int = 60
 
 var storageAccounts = [for i in range(1, storageAccountCount): {
     name: '${prefix}${i < 10 ? '0${i}' : i}'
