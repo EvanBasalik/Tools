@@ -20,3 +20,13 @@ resource storageAccountsRes 'Microsoft.Storage/storageAccounts@2022-09-01' = [fo
     kind: 'StorageV2'
     properties: {}
 }]
+
+// Add a resource lock for each storage account
+resource storageAccountLocks 'Microsoft.Authorization/locks@2020-05-01' = [for (sa, idx) in storageAccounts: {
+    name: '${sa.name}-lock'
+    scope: storageAccountsRes[idx]
+    properties: {
+        level: 'CanNotDelete'
+        notes: 'Lock to prevent accidental deletion of storage account.'
+    }
+}]
