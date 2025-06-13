@@ -26,7 +26,7 @@ resource storageAccountLocks 'Microsoft.Authorization/locks@2020-05-01' = [for (
     name: '${sa.name}-lock'
     scope: storageAccountsRes[idx]
     properties: {
-        level: 'CanNotDelete'
+       level: 'CanNotDelete'
         notes: 'Lock to prevent accidental deletion of storage account.'
     }
 }]

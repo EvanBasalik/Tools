@@ -1,10 +1,18 @@
-Subscription A = the subscription where the VNET and Private Endpoint resources will live
-Subscription B = the subscription where the Storage Accounts live
+Creation:
 
-1. Ensure you have access to both subscriptions
+Subscription A = the subscription where the VNET and Private Endpoint resources will live
+Subscription B = the subscription where the Storage accounts live
+Subscription C = the subscription to where we want to mvoe the VNET and Private Endpoints
+
+1. Ensure you have access to both subscriptions. You will need Network Contributor in the subscription holding the Storage accounts.
 2. Create a resource group called "RGPEMovePESide" in subscription A
 3. Deploy the PESide Bicep template in subscription A
 4. Update the StorageSide Bicep template to the correct number of Private Endpoints
 5. Deploy the StorageSide Bicep template in subscription B
 6. Update the PECreationScript PowerShell script with subscription A as "target" and subscription B as "source" and with the same number of Private Endpoints as set in #2
 7. Run the PECreationScript PowerShell to create the cross-subscription Private Endpoints
+
+Move Permisions:
+Subscription A - Contributor
+Subscription B - Owner (other permissions not tested)
+Subscription C - Contributor and User Access
