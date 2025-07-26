@@ -27,3 +27,9 @@ winget install --id Git.Git -e --source winget
 
 #Visual Studio
 winget install Microsoft.VisualStudio.2022.Community -e --override "--wait --quiet --addProductLang En-us --config base.vsconfig"
+
+#Google Drive
+winget install Google.GoogleDrive -e
+
+#Zoom
+winget install Zoom.ZoomWorkplace -e
