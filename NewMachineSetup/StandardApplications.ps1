@@ -3,14 +3,14 @@
 
 # Define a list of package IDs to include
 $personalinclude = @(
-    "Apple.Itunes",
+    "Apple.iTunes",
     "Apple.AppleMobileDeviceSupport",
     "Quicken.Quicken",
-    "Spotify.Spotify",
+    #"Spotify.Spotify",
     "Microsoft.PowerToys",
     "Google.GoogleDrive",
-    "Zoom.ZoomWorkplace",
-    "9NBLGGH516XP", # EarTrumpet
+    "Zoom.Zoom",
+    "File-New-Project.EarTrumpet", # EarTrumpet
     "Microsoft.Powershell"
 )
 
@@ -48,11 +48,11 @@ foreach ($pkg in $packagestoinstall) {
         #special case for Visual Studio 2022 Community Edition to account for the base.vsconfig file
         if ($pkg -eq "Microsoft.VisualStudio.2022.Community") {
             Write-Host "Installing missing package: $pkg"
-            winget install Microsoft.VisualStudio.2022.Community -e --override "--wait --quiet --addProductLang En-us --config base.vsconfig"
+            winget install Microsoft.VisualStudio.2022.Community -e --override "--wait --quiet --addProductLang En-us --config base.vsconfig" 
         }
         else {
             Write-Host "Installing missing package: $pkg"
-            winget install --id $pkg --accept-source-agreements --accept-package-agreements -e
+            winget install --id $pkg --accept-source-agreements --accept-package-agreements
         }
     } else {
         Write-Host "Package already installed: $pkg. Updating if necessary."
