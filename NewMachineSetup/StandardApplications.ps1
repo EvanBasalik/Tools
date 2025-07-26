@@ -1,35 +1,65 @@
 #Must be run as admin
-#Requires -RunAsAdministrator
+##Requires -RunAsAdministrator
 
-###   Personal   ###
-#iTunes
-winget install Apple.Itunes -e
-winget install Apple.AppleMobileDeviceSupport -e
+# Define a list of package IDs to include
+$personalinclude = @(
+    "Apple.Itunes",
+    "Apple.AppleMobileDeviceSupport",
+    "Quicken.Quicken",
+    "Spotify.Spotify",
+    "Microsoft.PowerToys",
+    "Google.GoogleDrive",
+    "Zoom.ZoomWorkplace",
+    "9NBLGGH516XP", # EarTrumpet
+    "Microsoft.Powershell"
+)
 
-#Quicken
-winget install Quicken.Quicken -e
+$workinclude = @(
+    "Git.Git",
+    "Microsoft.VisualStudio.2022.Community",
+    "Microsoft.VisualStudioCode"
+)
 
-#EarTrumpet
-winget install --Id 9NBLGGH516XP -e
+# Define a list of package IDs to exclude - typically for known version issues or conflicts
+$exclude = @(
+    "Microsoft.PowerToys"
+    # , "Microsoft.VisualStudio.2022.Community"
+)
 
-#Spotify
-winget install Spotify.Spotify -e
+# install the Microsoft.WinGet.Client module if not already installed
+if (-not (Get-Module -ListAvailable -Name Microsoft.WinGet.Client)) {
+    Install-Module -Name Microsoft.WinGet.Client -Force
+}
+Import-Module -Name Microsoft.WinGet.Client
 
-###   Work   ###
-#VSCode
-winget install Microsoft.VisualStudioCode -e
+$packagestoinstall = ($personalinclude + $workinclude) | Where-Object { $exclude -notcontains $_ }
 
-#PowerToys
-winget install --id=Microsoft.PowerToys -e
+# Ensure each package is installed
+$installed = (Get-WinGetPackage | Where-Object Source -eq winget).Id | Sort-Object
+foreach ($pkg in $packagestoinstall) {
+    Write-Host "Processing package: $pkg"
+    if ($installed -contains $pkg) {
+        $isInstalled = $true
+    }
+    else {
+        $isInstalled = $false
+    }
+    if (-not $isInstalled) {
+        #special case for Visual Studio 2022 Community Edition to account for the base.vsconfig file
+        if ($pkg -eq "Microsoft.VisualStudio.2022.Community") {
+            Write-Host "Installing missing package: $pkg"
+            winget install Microsoft.VisualStudio.2022.Community -e --override "--wait --quiet --addProductLang En-us --config base.vsconfig"
+        }
+        else {
+            Write-Host "Installing missing package: $pkg"
+            winget install --id $pkg --accept-source-agreements --accept-package-agreements -e
+        }
+    } else {
+        Write-Host "Package already installed: $pkg. Updating if necessary."
+        winget upgrade --id $pkg --accept-source-agreements --accept-package-agreements -e
+    }
+}
 
-#Git
-winget install --id Git.Git -e --source winget
 
-#Visual Studio
-winget install Microsoft.VisualStudio.2022.Community -e --override "--wait --quiet --addProductLang En-us --config base.vsconfig"
 
-#Google Drive
-winget install Google.GoogleDrive -e
 
-#Zoom
-winget install Zoom.ZoomWorkplace -e
