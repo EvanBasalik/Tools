@@ -10,8 +10,9 @@ $personalinclude = @(
     "Microsoft.PowerToys",
     "Google.GoogleDrive",
     "Zoom.Zoom",
-    "File-New-Project.EarTrumpet", # EarTrumpet
-    "Microsoft.Powershell"
+    "File-New-Project.EarTrumpet",
+    "Microsoft.Powershell",
+    "Microsoft.PowerBI"
 )
 
 $workinclude = @(
@@ -22,7 +23,8 @@ $workinclude = @(
 
 # Define a list of package IDs to exclude - typically for known version issues or conflicts
 $exclude = @(
-    "Microsoft.PowerToys"
+    "Microsoft.PowerToys",
+    "Apple.iTunes"
     # , "Microsoft.VisualStudio.2022.Community"
 )
 
