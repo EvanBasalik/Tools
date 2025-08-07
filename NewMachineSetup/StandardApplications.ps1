@@ -12,13 +12,15 @@ $personalinclude = @(
     "Zoom.Zoom",
     "File-New-Project.EarTrumpet",
     "Microsoft.Powershell",
-    "Microsoft.PowerBI"
+    "Microsoft.PowerBI",
+    "Google.Chrome"
 )
 
 $workinclude = @(
     "Git.Git",
     "Microsoft.VisualStudio.2022.Community",
-    "Microsoft.VisualStudioCode"
+    "Microsoft.VisualStudioCode",
+    "WiresharkFoundation.Wireshark"
 )
 
 # Define a list of package IDs to exclude - typically for known version issues or conflicts
