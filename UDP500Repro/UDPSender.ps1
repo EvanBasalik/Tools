@@ -55,7 +55,8 @@ try {
             $responseBytes = $udpClient.Receive([ref]$remoteEndpoint)
             $responseData = [System.Text.Encoding]::ASCII.GetString($responseBytes)
             
-            Write-Host "    Response from $($remoteEndpoint.Address):$($remoteEndpoint.Port): $responseData" -ForegroundColor Green
+            $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
+            Write-Host "    [$timestamp] Response from $($remoteEndpoint.Address):$($remoteEndpoint.Port): $responseData" -ForegroundColor Green
         }
         catch [System.Net.Sockets.SocketException] {
             Write-Host "    No response received (timeout)" -ForegroundColor Yellow

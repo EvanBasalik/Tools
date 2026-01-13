@@ -8,6 +8,10 @@ param vmSize string = 'Standard_D2s_v3'
 
 param location string = resourceGroup().location
 
+param udpListenerPort int = 500
+
+param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPListener.ps1'
+
 var vnetName = 'vnet-udp500'
 var subnetName = 'subnet-backend'
 var nsgName = 'nsg-udp500'
@@ -277,7 +281,12 @@ resource vmExtension 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' =
         typeHandlerVersion: '1.10'
         autoUpgradeMinorVersion: true
         settings: {
-            commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -Command "Invoke-WebRequest -Uri \'https://download.sysinternals.com/files/PSTools.zip\' -OutFile \'C:\\PSTools.zip\'; Expand-Archive -Path \'C:\\PSTools.zip\' -DestinationPath \'C:\\PSTools\' -Force; New-NetFirewallRule -DisplayName \'Allow UDP 500\' -Direction Inbound -Protocol UDP -LocalPort 500 -Action Allow"'
+            fileUris: [
+                udpListenerScriptUrl
+            ]
+        }
+        protectedSettings: {
+            commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -Command "New-NetFirewallRule -DisplayName \'Allow UDP ${udpListenerPort}\' -Direction Inbound -Protocol UDP -LocalPort ${udpListenerPort} -Action Allow -ErrorAction SilentlyContinue; $privateIP = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias \'Ethernet*\' | Where-Object {$_.IPAddress -like \'10.*\'}).IPAddress; New-Item -ItemType Directory -Path \'C:\\UDPListener\' -Force; $scriptPath = \'C:\\Packages\\Plugins\\Microsoft.Compute.CustomScriptExtension\\*\\Downloads\\0\\UDPListener.ps1\'; if (Test-Path $scriptPath) { Copy-Item $scriptPath -Destination \'C:\\UDPListener\\UDPListener.ps1\' -Force; $action = New-ScheduledTaskAction -Execute \'PowerShell.exe\' -Argument \"-NoProfile -ExecutionPolicy Bypass -File C:\\UDPListener\\UDPListener.ps1 -Port ${udpListenerPort} -IPAddress $privateIP\"; $trigger = New-ScheduledTaskTrigger -AtStartup; $principal = New-ScheduledTaskPrincipal -UserId \'SYSTEM\' -LogonType ServiceAccount -RunLevel Highest; Register-ScheduledTask -TaskName \'UDPListener\' -Action $action -Trigger $trigger -Principal $principal -Force; Start-ScheduledTask -TaskName \'UDPListener\' }"'
         }
     }
 }]

@@ -28,7 +28,6 @@ try {
     $serverName = $env:COMPUTERNAME
     
     Write-Host "UDP Listener started on $IPAddress`:$Port. Press Ctrl+C to stop." -ForegroundColor Green
-    Write-Host "Server Name: $serverName" -ForegroundColor Green
     
     while ($continueRunning) {
         # Check if data is available (non-blocking check)
@@ -37,7 +36,7 @@ try {
             $receivedBytes = $udpClient.Receive([ref]$remoteEndpoint)
             $receivedData = [System.Text.Encoding]::ASCII.GetString($receivedBytes)
             
-            Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Received from $($remoteEndpoint.Address):$($remoteEndpoint.Port)" -ForegroundColor Cyan
+            Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Received from $($remoteEndpoint.Address):$($remoteEndpoint.Port)" -ForegroundColor Cyan
             Write-Host "Data: $receivedData" -ForegroundColor White
             
             # Send response with server name
