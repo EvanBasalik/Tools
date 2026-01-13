@@ -11,7 +11,9 @@ param location string = resourceGroup().location
 
 param udpListenerPort int = 500
 
-param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/UDP500/UDP500Repro/UDPListener.ps1'
+param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPListener.ps1'
+
+param configureVMScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/ConfigureVM.ps1'
 
 var vnetName = 'vnet-udp'
 var subnetName = 'subnet-backend'
@@ -223,31 +225,10 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [for i in range(0, 
     }
 }]
 
-// Extension 1: Create firewall rule and setup directory
-resource vmFirewallExtension 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = [for i in range(0, vmCount): {
-    name: 'FirewallSetup'
+resource vmExtension 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = [for i in range(0, vmCount): {
+    name: 'CustomScriptExtension'
     parent: vm[i]
     location: location
-    properties: {
-        publisher: 'Microsoft.Compute'
-        type: 'CustomScriptExtension'
-        typeHandlerVersion: '1.10'
-        autoUpgradeMinorVersion: true
-        settings: {}
-        protectedSettings: {
-            commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -Command "New-NetFirewallRule -DisplayName \'\'Allow UDP ${udpListenerPort}\'\' -Direction Inbound -Protocol UDP -LocalPort ${udpListenerPort} -Action Allow -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Path \'\'C:\\UDPListener\'\' -Force"'
-        }
-    }
-}]
-
-// Extension 2: Download and setup UDP Listener script
-resource vmScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = [for i in range(0, vmCount): {
-    name: 'UDPListenerSetup'
-    parent: vm[i]
-    location: location
-    dependsOn: [
-        vmFirewallExtension[i]
-    ]
     properties: {
         publisher: 'Microsoft.Compute'
         type: 'CustomScriptExtension'
@@ -256,10 +237,11 @@ resource vmScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2023-03
         settings: {
             fileUris: [
                 udpListenerScriptUrl
+                configureVMScriptUrl
             ]
         }
         protectedSettings: {
-            commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -Command "$privateIP = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias \'\'Ethernet*\'\' | Where-Object {$_.IPAddress -like \'\'10.*\'\'}).IPAddress; $scriptPath = \'\'C:\\Packages\\Plugins\\Microsoft.Compute.CustomScriptExtension\\*\\Downloads\\0\\UDPListener.ps1\'\'; if (Test-Path $scriptPath) { Copy-Item $scriptPath -Destination \'\'C:\\UDPListener\\UDPListener.ps1\'\' -Force; $action = New-ScheduledTaskAction -Execute \'\'PowerShell.exe\'\' -Argument \'\'-NoProfile -ExecutionPolicy Bypass -File C:\\UDPListener\\UDPListener.ps1 -Port ${udpListenerPort} -IPAddress $privateIP\'\'; $trigger = New-ScheduledTaskTrigger -AtStartup; $principal = New-ScheduledTaskPrincipal -UserId \'\'SYSTEM\'\' -LogonType ServiceAccount -RunLevel Highest; Register-ScheduledTask -TaskName \'\'UDPListener\'\' -Action $action -Trigger $trigger -Principal $principal -Force; Start-ScheduledTask -TaskName \'\'UDPListener\'\' }"'
+            commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ConfigureVM.ps1 -Port ${udpListenerPort}'
         }
     }
 }]

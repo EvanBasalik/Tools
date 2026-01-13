@@ -25,15 +25,18 @@ param udpListenerPort int = 500
 @description('URL to the UDP listener PowerShell script')
 param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPListener.ps1'
 
+@description('URL to the VM configuration PowerShell script')
+param configureVMScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/ConfigureVM.ps1'
+
 // Create the resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
 }
 
-// Deploy the UDP500 resources into the resource group
-module udp500Resources './UDPTest.bicep' = {
-  name: 'udp-deployment'
+// Deploy the UDP test resources into the resource group
+module udpTestResources './udptest.bicep' = {
+  name: 'udptest-deployment'
   scope: rg
   params: {
     vmAdminUsername: vmAdminUsername
@@ -43,10 +46,6 @@ module udp500Resources './UDPTest.bicep' = {
     location: location
     udpListenerPort: udpListenerPort
     udpListenerScriptUrl: udpListenerScriptUrl
+    configureVMScriptUrl: configureVMScriptUrl
   }
 }
-
-output resourceGroupName string = rg.name
-output loadBalancerPublicIP string = udp500Resources.outputs.loadBalancerPublicIP
-output vm0PublicIP string = udp500Resources.outputs.vm0PublicIP
-output vm1PublicIP string = udp500Resources.outputs.vm1PublicIP
