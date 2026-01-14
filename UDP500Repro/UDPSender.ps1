@@ -41,6 +41,35 @@ function Write-Log {
     $consoleMessage += $Message
     Write-Host $consoleMessage -ForegroundColor $Color
     
+    # Check log file size and roll if necessary (1 MB = 1048576 bytes)
+    if (Test-Path $LogFile) {
+        $fileSize = (Get-Item $LogFile).Length
+        if ($fileSize -ge 1048576) {
+            $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+            $baseName = [System.IO.Path]::GetFileNameWithoutExtension($LogFile)
+            $extension = [System.IO.Path]::GetExtension($LogFile)
+            $directory = [System.IO.Path]::GetDirectoryName($LogFile)
+            
+            # Remove existing timestamp from basename if present
+            $baseName = $baseName -replace '_\d{8}_\d{6}$', ''
+            
+            $archivedLogFile = Join-Path $directory "$baseName`_$timestamp$extension"
+            Move-Item -Path $LogFile -Destination $archivedLogFile -Force
+            
+            # Create new log file with CSV header
+            $headerEntry = [PSCustomObject]@{
+                Timestamp = $timestamp
+                Iteration = 0
+                EventType = "LogRolled"
+                RemoteIP = ""
+                RemotePort = 0
+                BytesSent = 0
+                Message = "Previous log archived to: $archivedLogFile"
+            }
+            $headerEntry | Export-Csv -Path $LogFile -NoTypeInformation
+        }
+    }
+    
     # Write to log file in CSV format
     $logEntry = [PSCustomObject]@{
         Timestamp = $timestamp
