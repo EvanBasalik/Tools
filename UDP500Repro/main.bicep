@@ -22,6 +22,9 @@ param vmSize string = 'Standard_D2s_v3'
 @description('UDP listener port')
 param udpListenerPort int = 500
 
+@description('Number of VMs to deploy')
+param vmCount int = 2
+
 @description('URL to the UDP listener PowerShell script')
 param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPListener.ps1'
 
