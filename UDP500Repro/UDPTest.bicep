@@ -13,6 +13,8 @@ param udpListenerPort int = 500
 
 param udpListenerScriptUrl string
 
+param udpSenderScriptUrl string
+
 param configureVMScriptUrl string
 
 var vnetName = 'vnet-udp'
@@ -185,10 +187,25 @@ resource nic 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range(
     }
 }]
 
+resource availabilitySet 'Microsoft.Compute/availabilitySets@2023-03-01' = {
+    name: 'avset-udp'
+    location: location
+    sku: {
+        name: 'Aligned'
+    }
+    properties: {
+        platformFaultDomainCount: 2
+        platformUpdateDomainCount: 5
+    }
+}
+
 resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [for i in range(0, vmCount): {
     name: 'vm-udp500-${i}'
     location: location
     properties: {
+        availabilitySet: {
+            id: availabilitySet.id
+        }
         hardwareProfile: {
             vmSize: vmSize
         }

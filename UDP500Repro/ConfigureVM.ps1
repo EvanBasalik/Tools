@@ -42,6 +42,21 @@ try {
     Write-Host "Copying to C:\UDPListener..."
     Copy-Item $scriptPath -Destination 'C:\UDPListener\UDPListener.ps1' -Force
 
+    Write-Host "Locating downloaded UDPSender.ps1 script..."
+    $senderScriptPath = Get-ChildItem -Path 'C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension' `
+        -Recurse `
+        -Filter 'UDPSender.ps1' `
+        -ErrorAction SilentlyContinue | 
+        Select-Object -First 1 -ExpandProperty FullName
+
+    if (-not $senderScriptPath) {
+        throw "UDPSender.ps1 not found in extension directory"
+    }
+
+    Write-Host "Found script at: $senderScriptPath"
+    Write-Host "Copying to C:\UDPListener..."
+    Copy-Item $senderScriptPath -Destination 'C:\UDPListener\UDPSender.ps1' -Force
+
     Write-Host "Creating scheduled task..."
     $action = New-ScheduledTaskAction -Execute 'PowerShell.exe' `
         -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\UDPListener\UDPListener.ps1 -Port $Port -IPAddress $privateIP"
