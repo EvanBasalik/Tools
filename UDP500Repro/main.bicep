@@ -28,6 +28,10 @@ param vmCount int = 2
 @description('URL to the UDP listener PowerShell script')
 param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPListener.ps1'
 
+@description('URL to the UDP sender PowerShell script')
+param udpSenderScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPSender.ps1'
+
+
 @description('URL to the VM configuration PowerShell script')
 param configureVMScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/ConfigureVM.ps1'
 
@@ -49,6 +53,7 @@ module udpTestResources './udptest.bicep' = {
     location: location
     udpListenerPort: udpListenerPort
     udpListenerScriptUrl: udpListenerScriptUrl
+    udpSenderScriptUrl: udpSenderScriptUrl
     configureVMScriptUrl: configureVMScriptUrl
   }
 }

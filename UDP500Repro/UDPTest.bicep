@@ -238,6 +238,7 @@ resource vmExtension 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' =
             fileUris: [
                 udpListenerScriptUrl
                 configureVMScriptUrl
+                udpSenderScriptUrl
             ]
         }
         protectedSettings: {
