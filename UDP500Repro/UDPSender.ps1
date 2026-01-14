@@ -13,12 +13,41 @@ param(
     
     [Parameter(Mandatory = $false)]
     [ValidateRange(1, [int]::MaxValue)]
-    [int]$Iterations
+    [int]$Iterations,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$LogFile = "UDPSender_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 )
+
+# Function to write to both console and log file
+function Write-Log {
+    param(
+        [string]$Message,
+        [string]$Color = "White"
+    )
+    
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
+    $logMessage = "[$timestamp] $Message"
+    
+    # Write to console with color
+    Write-Host $Message -ForegroundColor $Color
+    
+    # Write to log file
+    Add-Content -Path $LogFile -Value $logMessage
+}
+
+# Initialize log file
+$logHeader = @"
+=== UDP Sender Log ===
+Started: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+Target: ${TargetIP}:${Port}
+Message: $Message
+"@
+Set-Content -Path $LogFile -Value $logHeader
 
 # Validate that Continuous and Iterations are not used together
 if ($Continuous -and $PSBoundParameters.ContainsKey('Iterations')) {
-    Write-Error "Cannot use -Continuous and -Iterations parameters together. Please specify only one."
+    Write-Log "ERROR: Cannot use -Continuous and -Iterations parameters together. Please specify only one." "Red"
     exit 1
 }
 
@@ -26,12 +55,14 @@ if ($Continuous -and $PSBoundParameters.ContainsKey('Iterations')) {
 $iterationCount = 1
 if ($Continuous) {
     $iterationCount = [int]::MaxValue
-    Write-Host "Running continuously. Press Ctrl+C to stop." -ForegroundColor Yellow
+    Write-Log "Running continuously. Press Ctrl+C to stop." "Yellow"
 }
 elseif ($PSBoundParameters.ContainsKey('Iterations')) {
     $iterationCount = $Iterations
-    Write-Host "Running for $Iterations iteration(s)." -ForegroundColor Yellow
+    Write-Log "Running for $Iterations iteration(s)." "Yellow"
 }
+
+Write-Log "Log file: $LogFile" "Cyan"
 
 # Create UDP client
 $udpClient = New-Object System.Net.Sockets.UdpClient
@@ -44,8 +75,8 @@ try {
         # Send the UDP packet
         $bytesSent = $udpClient.Send($bytes, $bytes.Length, $TargetIP, $Port)
         
-        Write-Host "[$i] Sent $bytesSent bytes to $TargetIP`:$Port"
-        Write-Host "    Message: $Message"
+        Write-Log "[$i] Sent $bytesSent bytes to $TargetIP`:$Port"
+        Write-Log "    Message: $Message"
         
         # Wait for response with timeout
         $udpClient.Client.ReceiveTimeout = 2000  # 2 second timeout
@@ -55,11 +86,10 @@ try {
             $responseBytes = $udpClient.Receive([ref]$remoteEndpoint)
             $responseData = [System.Text.Encoding]::ASCII.GetString($responseBytes)
             
-            $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
-            Write-Host "    [$timestamp] Response from $($remoteEndpoint.Address):$($remoteEndpoint.Port): $responseData" -ForegroundColor Green
+            Write-Log "    Response from $($remoteEndpoint.Address):$($remoteEndpoint.Port): $responseData" "Green"
         }
         catch [System.Net.Sockets.SocketException] {
-            Write-Host "    No response received (timeout)" -ForegroundColor Yellow
+            Write-Log "    No response received (timeout)" "Yellow"
         }
         
         # Small delay between iterations (except for last one)
@@ -70,8 +100,9 @@ try {
 }
 catch {
     Write-Error "Failed to send UDP packet: $_"
-}
+}Log "ERROR: Failed to send UDP packet: $_" "Red"
 finally {
     # Clean up
     $udpClient.Close()
+    Write-Log "UDP client closed. Session ended." "Cyan"
 }
