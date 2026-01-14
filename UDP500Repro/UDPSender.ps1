@@ -48,7 +48,7 @@ try {
         Write-Host "    Message: $Message"
         
         # Wait for response with timeout
-        $udpClient.Client.ReceiveTimeout = 5000  # 5 second timeout
+        $udpClient.Client.ReceiveTimeout = 2000  # 2 second timeout
         
         try {
             $remoteEndpoint = New-Object System.Net.IPEndPoint([System.Net.IPAddress]::Any, 0)
@@ -64,7 +64,7 @@ try {
         
         # Small delay between iterations (except for last one)
         if ($i -lt $iterationCount) {
-            Start-Sleep -Milliseconds 100
+            Start-Sleep -Milliseconds 1000
         }
     }
 }
