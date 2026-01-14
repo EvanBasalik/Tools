@@ -17,12 +17,13 @@ param udpSenderScriptUrl string
 
 param configureVMScriptUrl string
 
+param vmCount int
+
 var vnetName = 'vnet-udp'
 var subnetName = 'subnet-backend'
 var nsgName = 'nsg-udp'
 var lbName = 'lb-udp'
 var lbPublicIPName = 'pip-lb-udp'
-var vmCount = 2
 var lbBackendPoolName = 'backendPool'
 var lbProbeName = 'healthProbe'
 
@@ -188,7 +189,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range(
 }]
 
 resource availabilitySet 'Microsoft.Compute/availabilitySets@2023-03-01' = {
-    name: 'avset-udp'
+    name: 'avset-udp-${resourceGroup().name}'
     location: location
     sku: {
         name: 'Aligned'
@@ -196,15 +197,29 @@ resource availabilitySet 'Microsoft.Compute/availabilitySets@2023-03-01' = {
     properties: {
         platformFaultDomainCount: 2
         platformUpdateDomainCount: 5
+        proximityPlacementGroup: {
+            id: proximityPlacementGroup.id
+        }
+    }
+}
+
+resource proximityPlacementGroup 'Microsoft.Compute/proximityPlacementGroups@2023-03-01' = {
+    name: 'ppg-udp'
+    location: location
+    properties: {
+        proximityPlacementGroupType: 'Standard'
     }
 }
 
 resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [for i in range(0, vmCount): {
-    name: 'vm-udp500-${i}'
+    name: 'vm-udp500-${i}-${resourceGroup().name}'
     location: location
     properties: {
         availabilitySet: {
             id: availabilitySet.id
+        }
+        proximityPlacementGroup: {
+            id: proximityPlacementGroup.id
         }
         hardwareProfile: {
             vmSize: vmSize

@@ -55,6 +55,7 @@ module udpTestResources './udptest.bicep' = {
     udpListenerScriptUrl: udpListenerScriptUrl
     udpSenderScriptUrl: udpSenderScriptUrl
     configureVMScriptUrl: configureVMScriptUrl
+    vmCount: vmCount
   }
 }
 
