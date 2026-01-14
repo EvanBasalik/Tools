@@ -20,7 +20,7 @@ param vmAdminPassword string
 param sourceIPAddress string = '52.160.0.0/11'
 
 @description('VM size')
-param vmSize string = 'Standard_D2s_v3'
+param vmSize string = 'Standard_F4s'
 
 @description('UDP listener port')
 param udpListenerPort int = 500
