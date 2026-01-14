@@ -23,10 +23,10 @@ param vmSize string = 'Standard_D2s_v3'
 param udpListenerPort int = 500
 
 @description('URL to the UDP listener PowerShell script')
-param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/UDP500/UDP500Repro/UDPListener.ps1'
+param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPListener.ps1'
 
 @description('URL to the VM configuration PowerShell script')
-param configureVMScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/UDP500/UDP500Repro/ConfigureVM.ps1'
+param configureVMScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/ConfigureVM.ps1'
 
 // Create the resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {

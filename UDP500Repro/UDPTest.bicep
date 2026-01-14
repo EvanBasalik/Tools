@@ -11,9 +11,9 @@ param location string = resourceGroup().location
 
 param udpListenerPort int = 500
 
-param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/UDP500/UDP500Repro/UDPListener.ps1'
+param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPListener.ps1'
 
-param configureVMScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/UDP500/UDP500Repro/ConfigureVM.ps1'
+param configureVMScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/ConfigureVM.ps1'
 
 // ...existing code remains the same until vmExtension...
 
