@@ -1,3 +1,6 @@
+//netstat -aon | findstr ":500" | findstr "LISTENING" to check for UDP listener process
+//az deployment sub create --location westus2 --template-file ./main.bicep to deploy via CLI
+
 targetScope = 'subscription'
 
 @description('Name of the resource group to create')
