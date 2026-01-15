@@ -17,7 +17,7 @@ param vmAdminUsername string = 'azureuser'
 param vmAdminPassword string
 
 @description('Source IP address range for NSG rules')
-param sourceIPAddress string = '52.160.0.0/11'
+param sourceIPAddress string = '52.160.0.0/11, 20.98.114.205'
 
 @description('VM size')
 param vmSize string = 'Standard_F4s'
