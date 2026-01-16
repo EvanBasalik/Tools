@@ -50,6 +50,11 @@ function Write-Log {
             $extension = [System.IO.Path]::GetExtension($LogFile)
             $directory = [System.IO.Path]::GetDirectoryName($LogFile)
             
+            # If directory is empty (file has no path), use current directory
+            if ([string]::IsNullOrEmpty($directory)) {
+                $directory = Get-Location | Select-Object -ExpandProperty Path
+            }
+            
             # Remove existing timestamp from basename if present
             $baseName = $baseName -replace '_\d{8}_\d{6}$', ''
             
