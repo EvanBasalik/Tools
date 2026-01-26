@@ -13,7 +13,7 @@ $scriptPath = $PSScriptRoot
 if ([string]::IsNullOrEmpty($scriptPath)) {
     $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 }
-$transcriptBaseName = "UDPListener"
+$transcriptBaseName = "TCPListener"
 $transcriptFile = Join-Path $scriptPath "${transcriptBaseName}_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 $maxLogSizeBytes = 1MB
 $lastLogCheckTime = Get-Date
@@ -41,12 +41,12 @@ Start-Transcript -Path $transcriptFile -Append
 Write-Host "Transcript logging to: $transcriptFile" -ForegroundColor Cyan
 Write-Host "Log file will roll at $($maxLogSizeBytes / 1MB) MB" -ForegroundColor Cyan
 
-# Create firewall rule for UDP port
-Write-Host "Creating firewall rule for UDP port $Port..." -ForegroundColor Cyan
+# Create firewall rule for TCP port
+Write-Host "Creating firewall rule for TCP port $Port..." -ForegroundColor Cyan
 try {
-    New-NetFirewallRule -DisplayName "Allow UDP $Port" `
+    New-NetFirewallRule -DisplayName "Allow TCP $Port" `
         -Direction Inbound `
-        -Protocol UDP `
+        -Protocol TCP `
         -LocalPort $Port `
         -Action Allow `
         -ErrorAction SilentlyContinue | Out-Null
@@ -68,37 +68,59 @@ try {
     $ipAddr = [System.Net.IPAddress]::Parse($IPAddress)
     $localEndpoint = New-Object System.Net.IPEndPoint($ipAddr, $Port)
     
-    # Create UDP client and bind to the specified IP and port
-    $udpClient = New-Object System.Net.Sockets.UdpClient $localEndpoint
-    $remoteEndpoint = New-Object System.Net.IPEndPoint([System.Net.IPAddress]::Any, 0)
+    # Create TCP listener
+    $tcpListener = New-Object System.Net.Sockets.TcpListener $localEndpoint
+    $tcpListener.Start()
     
     # Get local server name
     $serverName = $env:COMPUTERNAME
     
-    Write-Host "UDP Listener started on $IPAddress`:$Port. Press Ctrl+C to stop." -ForegroundColor Green
+    Write-Host "TCP Listener started on $IPAddress`:$Port. Press Ctrl+C to stop." -ForegroundColor Green
     
     $packetCount = 0
     while ($continueRunning) {
-        # Check if data is available (non-blocking check)
-        if ($udpClient.Available -gt 0) {
-            # Receive data
-            $receivedBytes = $udpClient.Receive([ref]$remoteEndpoint)
-            $receivedData = [System.Text.Encoding]::ASCII.GetString($receivedBytes)
+        # Check if a client is pending (non-blocking check)
+        if ($tcpListener.Pending()) {
+            # Accept the client connection
+            $client = $tcpListener.AcceptTcpClient()
+            $remoteEndpoint = $client.Client.RemoteEndPoint
             
-            Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Received from $($remoteEndpoint.Address):$($remoteEndpoint.Port)" -ForegroundColor Cyan
-            Write-Host "Data: $receivedData" -ForegroundColor White
+            Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Client connected from $($remoteEndpoint.Address):$($remoteEndpoint.Port)" -ForegroundColor Cyan
             
-            # Send response with server name
-            $responseMessage = "Server: $serverName"
-            $responseBytes = [System.Text.Encoding]::ASCII.GetBytes($responseMessage)
-            $bytesSent = $udpClient.Send($responseBytes, $responseBytes.Length, $remoteEndpoint)
-            
-            Write-Host "Sent response: $responseMessage ($bytesSent bytes)" -ForegroundColor Green
-            
-            # Check log file size every 10 packets
-            $packetCount++
-            if ($packetCount % 10 -eq 0) {
-                Test-AndRollLogFile -CurrentLogFile $transcriptFile
+            try {
+                # Get network stream
+                $stream = $client.GetStream()
+                $stream.ReadTimeout = 5000  # 5 second timeout
+                
+                # Read data from client
+                $buffer = New-Object byte[] 1024
+                $bytesRead = $stream.Read($buffer, 0, $buffer.Length)
+                
+                if ($bytesRead -gt 0) {
+                    $receivedData = [System.Text.Encoding]::ASCII.GetString($buffer, 0, $bytesRead)
+                    Write-Host "Data: $receivedData" -ForegroundColor White
+                    
+                    # Send response with server name
+                    $responseMessage = "Server: $serverName"
+                    $responseBytes = [System.Text.Encoding]::ASCII.GetBytes($responseMessage)
+                    $stream.Write($responseBytes, 0, $responseBytes.Length)
+                    
+                    Write-Host "Sent response: $responseMessage ($($responseBytes.Length) bytes)" -ForegroundColor Green
+                    
+                    # Check log file size every 10 packets
+                    $packetCount++
+                    if ($packetCount % 10 -eq 0) {
+                        Test-AndRollLogFile -CurrentLogFile $transcriptFile
+                    }
+                }
+            }
+            catch {
+                Write-Host "Error handling client: $($_.Exception.Message)" -ForegroundColor Red
+            }
+            finally {
+                # Close the client connection
+                if ($stream) { $stream.Close() }
+                if ($client) { $client.Close() }
             }
         }
         else {
@@ -120,9 +142,9 @@ catch {
     Write-Host "Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
 }
 finally {
-    if ($udpClient) {
-        $udpClient.Close()
-        Write-Host "UDP Listener stopped." -ForegroundColor Yellow
+    if ($tcpListener) {
+        $tcpListener.Stop()
+        Write-Host "TCP Listener stopped." -ForegroundColor Yellow
     }
     Unregister-Event -SourceIdentifier PowerShell.Exiting -ErrorAction SilentlyContinue
     
