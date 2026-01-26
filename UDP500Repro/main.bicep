@@ -17,7 +17,7 @@ param vmAdminUsername string = 'azureuser'
 param vmAdminPassword string
 
 @description('Source IP address range for NSG rules')
-param sourceIPAddress string = '52.160.0.0/11, 20.98.114.205'
+param sourceIPAddress string = '52.160.0.0/11'
 
 @description('VM size')
 param vmSize string = 'Standard_F4s'
@@ -33,6 +33,12 @@ param udpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasal
 
 @description('URL to the UDP sender PowerShell script')
 param udpSenderScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/UDPSender.ps1'
+
+@description('URL to the TCP listener PowerShell script')
+param tcpListenerScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/TCPListener.ps1'
+
+@description('URL to the TCP sender PowerShell script')
+param tcpSenderScriptUrl string = 'https://raw.githubusercontent.com/EvanBasalik/Tools/main/UDP500Repro/TCPSender.ps1'
 
 
 @description('URL to the VM configuration PowerShell script')
@@ -57,6 +63,8 @@ module udpTestResources './udptest.bicep' = {
     udpListenerPort: udpListenerPort
     udpListenerScriptUrl: udpListenerScriptUrl
     udpSenderScriptUrl: udpSenderScriptUrl
+    tcpListenerScriptUrl: tcpListenerScriptUrl
+    tcpSenderScriptUrl: tcpSenderScriptUrl
     configureVMScriptUrl: configureVMScriptUrl
     vmCount: vmCount
   }

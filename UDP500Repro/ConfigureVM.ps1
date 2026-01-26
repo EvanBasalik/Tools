@@ -6,14 +6,6 @@ param(
 $ErrorActionPreference = 'Stop'
 
 try {
-    Write-Host "Creating firewall rule for UDP port $Port..."
-    New-NetFirewallRule -DisplayName "Allow UDP $Port" `
-        -Direction Inbound `
-        -Protocol UDP `
-        -LocalPort $Port `
-        -Action Allow `
-        -ErrorAction SilentlyContinue
-
     Write-Host "Creating UDPListener directory..."
     New-Item -ItemType Directory -Path 'C:\UDPListener' -Force | Out-Null
 
@@ -57,24 +49,79 @@ try {
     Write-Host "Copying to C:\UDPListener..."
     Copy-Item $senderScriptPath -Destination 'C:\UDPListener\UDPSender.ps1' -Force
 
-    Write-Host "Creating scheduled task..."
-    $action = New-ScheduledTaskAction -Execute 'PowerShell.exe' `
-        -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\UDPListener\UDPListener.ps1 -Port $Port -IPAddress $privateIP"
-    
-    $trigger = New-ScheduledTaskTrigger -AtStartup
-    
-    $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
-        -LogonType ServiceAccount `
-        -RunLevel Highest
+    Write-Host "Locating downloaded TCPListener.ps1 script..."
+    $tcpListenerScriptPath = Get-ChildItem -Path 'C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension' `
+        -Recurse `
+        -Filter 'TCPListener.ps1' `
+        -ErrorAction SilentlyContinue | 
+        Select-Object -First 1 -ExpandProperty FullName
 
-    Register-ScheduledTask -TaskName 'UDPListener' `
-        -Action $action `
-        -Trigger $trigger `
-        -Principal $principal `
-        -Force | Out-Null
+    if ($tcpListenerScriptPath) {
+        Write-Host "Found script at: $tcpListenerScriptPath"
+        Write-Host "Copying to C:\UDPListener..."
+        Copy-Item $tcpListenerScriptPath -Destination 'C:\UDPListener\TCPListener.ps1' -Force
+    }
+    else {
+        Write-Host "Warning: TCPListener.ps1 not found in extension directory" -ForegroundColor Yellow
+    }
 
-    Write-Host "Starting UDPListener task..."
-    Start-ScheduledTask -TaskName 'UDPListener'
+    Write-Host "Locating downloaded TCPSender.ps1 script..."
+    $tcpSenderScriptPath = Get-ChildItem -Path 'C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension' `
+        -Recurse `
+        -Filter 'TCPSender.ps1' `
+        -ErrorAction SilentlyContinue | 
+        Select-Object -First 1 -ExpandProperty FullName
+
+    if ($tcpSenderScriptPath) {
+        Write-Host "Found script at: $tcpSenderScriptPath"
+        Write-Host "Copying to C:\UDPListener..."
+        Copy-Item $tcpSenderScriptPath -Destination 'C:\UDPListener\TCPSender.ps1' -Force
+    }
+    else {
+        Write-Host "Warning: TCPSender.ps1 not found in extension directory" -ForegroundColor Yellow
+    }
+
+    # Write-Host "Creating scheduled task for UDP Listener..."
+    # $action = New-ScheduledTaskAction -Execute 'PowerShell.exe' `
+    #     -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\UDPListener\UDPListener.ps1 -Port $Port -IPAddress $privateIP"
+    
+    # $trigger = New-ScheduledTaskTrigger -AtStartup
+    
+    # $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
+    #     -LogonType ServiceAccount `
+    #     -RunLevel Highest
+
+    # $settings = New-ScheduledTaskSettingsSet -Disabled
+
+    # Register-ScheduledTask -TaskName 'UDPListener' `
+    #     -Action $action `
+    #     -Trigger $trigger `
+    #     -Principal $principal `
+    #     -Settings $settings `
+    #     -Force | Out-Null
+
+    # Write-Host "UDPListener task created (disabled)."
+
+    # Write-Host "Creating scheduled task for TCP Listener..."
+    # $tcpAction = New-ScheduledTaskAction -Execute 'PowerShell.exe' `
+    #     -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\UDPListener\TCPListener.ps1 -Port $Port -IPAddress $privateIP"
+    
+    # $tcpTrigger = New-ScheduledTaskTrigger -AtStartup
+    
+    # $tcpPrincipal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
+    #     -LogonType ServiceAccount `
+    #     -RunLevel Highest
+
+    # $tcpSettings = New-ScheduledTaskSettingsSet -Disabled
+
+    # Register-ScheduledTask -TaskName 'TCPListener' `
+    #     -Action $tcpAction `
+    #     -Trigger $tcpTrigger `
+    #     -Principal $tcpPrincipal `
+    #     -Settings $tcpSettings `
+    #     -Force | Out-Null
+
+    # Write-Host "TCPListener task created (disabled)."
 
     Write-Host "Configuration completed successfully!"
     exit 0
