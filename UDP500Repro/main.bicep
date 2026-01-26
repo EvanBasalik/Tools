@@ -45,7 +45,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 }
 
 // Deploy the UDP test resources into the resource group
-module udpTestResources './udptest.bicep' = {
+module udpTestResources './UDPVM.bicep' = {
   name: 'udptest-deployment'
   scope: rg
   params: {
