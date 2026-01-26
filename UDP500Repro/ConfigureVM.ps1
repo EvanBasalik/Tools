@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 try {
-    Write-Host "Creating UDPListener directory..."
+    Write-Host "Creating UDPListener directory... "
     New-Item -ItemType Directory -Path 'C:\UDPListener' -Force | Out-Null
 
     Write-Host "Getting private IP address..."
