@@ -123,6 +123,32 @@ try {
 
     # Write-Host "TCPListener task created (disabled)."
 
+    # Install winget using asheroto script
+    Write-Host "Installing winget..."
+    try {
+        irm asheroto.com/winget | iex
+        Write-Host "winget installed successfully." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Failed to install winget: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+
+    # Install Windows Terminal
+    Write-Host "Installing Windows Terminal..."
+    try {
+        $wingetPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe"
+        if (Test-Path $wingetPath) {
+            & $wingetPath install --id Microsoft.WindowsTerminal --silent --accept-package-agreements --accept-source-agreements
+            Write-Host "Windows Terminal installed successfully." -ForegroundColor Green
+        }
+        else {
+            Write-Host "winget not available, skipping Windows Terminal installation." -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "Failed to install Windows Terminal: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+
     Write-Host "Configuration completed successfully!"
     exit 0
 }
