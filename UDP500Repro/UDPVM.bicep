@@ -23,11 +23,11 @@ param configureVMScriptUrl string
 
 param vmCount int
 
-var vnetName = 'vnet-udp-${resourceGroup().name}'
+var vnetName = 'vnet-udp'
 var subnetName = 'subnet-backend'
-var nsgName = 'nsg-udp-${resourceGroup().name}'
-var lbName = 'lb-udp-${resourceGroup().name}'
-var lbPublicIPName = 'pip-lb-udp-${resourceGroup().name}'
+var nsgName = 'nsg-udp'
+var lbName = 'lb-udp'
+var lbPublicIPName = 'pip-lb-udp'
 var lbBackendPoolName = 'backendPool'
 var lbProbeName = 'healthProbe'
 
@@ -99,7 +99,7 @@ resource lbPublicIP 'Microsoft.Network/publicIPAddresses@2023-05-01' = {
 }
 
 resource vmPublicIP 'Microsoft.Network/publicIPAddresses@2023-05-01' = [for i in range(0, vmCount): {
-    name: 'pip-vm${i}-${resourceGroup().name}'
+    name: 'pip-vm${i}'
     location: location
     sku: {
         name: 'Standard'
@@ -167,7 +167,7 @@ resource lb 'Microsoft.Network/loadBalancers@2023-05-01' = {
 }
 
 resource nic1 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range(0, vmCount): {
-    name: 'nic1-vm${i}-${resourceGroup().name}'
+    name: 'nic1-vm${i}'
     location: location
     properties: {
         ipConfigurations: [
@@ -194,7 +194,7 @@ resource nic1 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range
 }]
 
 resource nic2 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range(0, vmCount): {
-    name: 'nic2-vm${i}-${resourceGroup().name}'
+    name: 'nic2-vm${i}'
     location: location
     properties: {
         ipConfigurations: [
@@ -213,7 +213,7 @@ resource nic2 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range
 }]
 
 resource nic3 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range(0, vmCount): {
-    name: 'nic3-vm${i}-${resourceGroup().name}'
+    name: 'nic3-vm${i}'
     location: location
     properties: {
         ipConfigurations: [
@@ -232,7 +232,7 @@ resource nic3 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range
 }]
 
 resource nic4 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range(0, vmCount): {
-    name: 'nic4-vm${i}-${resourceGroup().name}'
+    name: 'nic4-vm${i}'
     location: location
     properties: {
         ipConfigurations: [
@@ -251,7 +251,7 @@ resource nic4 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range
 }]
 
 resource availabilitySet 'Microsoft.Compute/availabilitySets@2023-03-01' = {
-    name: 'avset-udp-${resourceGroup().name}'
+    name: 'avset-udp'
     location: location
     sku: {
         name: 'Aligned'
@@ -266,7 +266,7 @@ resource availabilitySet 'Microsoft.Compute/availabilitySets@2023-03-01' = {
 }
 
 resource proximityPlacementGroup 'Microsoft.Compute/proximityPlacementGroups@2023-03-01' = {
-    name: 'ppg-udp-${resourceGroup().name}'
+    name: 'ppg-udp'
     location: location
     properties: {
         proximityPlacementGroupType: 'Standard'
@@ -274,7 +274,7 @@ resource proximityPlacementGroup 'Microsoft.Compute/proximityPlacementGroups@202
 }
 
 resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [for i in range(0, vmCount): {
-    name: 'vm-udp500-${i}-${resourceGroup().name}'
+    name: 'vm-udp500-${i}'
     location: location
     properties: {
         availabilitySet: {
