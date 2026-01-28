@@ -175,7 +175,7 @@ resource nic1 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range
                 name: 'ipconfig1'
                 properties: {
                     privateIPAllocationMethod: 'Static'
-                    privateIPAddress: '10.0.1.${10 + i}'
+                    privateIPAddress: '10.0.1.${100 + i}'
                     subnet: {
                         id: '${vnet.id}/subnets/${subnetName}'
                     }
@@ -202,7 +202,7 @@ resource nic2 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range
                 name: 'ipconfig1'
                 properties: {
                     privateIPAllocationMethod: 'Static'
-                    privateIPAddress: '10.0.1.${20 + i}'
+                    privateIPAddress: '10.0.1.${110 + i}'
                     subnet: {
                         id: '${vnet.id}/subnets/${subnetName}'
                     }
@@ -221,7 +221,7 @@ resource nic3 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range
                 name: 'ipconfig1'
                 properties: {
                     privateIPAllocationMethod: 'Static'
-                    privateIPAddress: '10.0.1.${30 + i}'
+                    privateIPAddress: '10.0.1.${120 + i}'
                     subnet: {
                         id: '${vnet.id}/subnets/${subnetName}'
                     }
@@ -240,7 +240,7 @@ resource nic4 'Microsoft.Network/networkInterfaces@2023-05-01' = [for i in range
                 name: 'ipconfig1'
                 properties: {
                     privateIPAllocationMethod: 'Static'
-                    privateIPAddress: '10.0.1.${40 + i}'
+                    privateIPAddress: '10.0.1.${130 + i}'
                     subnet: {
                         id: '${vnet.id}/subnets/${subnetName}'
                     }
