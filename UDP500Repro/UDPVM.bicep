@@ -19,15 +19,19 @@ param tcpListenerScriptUrl string
 
 param tcpSenderScriptUrl string
 
+param tcpListenerScriptUrl string
+
+param tcpSenderScriptUrl string
+
 param configureVMScriptUrl string
 
 param vmCount int
 
-var vnetName = 'vnet-udp'
+var vnetName = 'vnet-udp-${resourceGroup().name}'
 var subnetName = 'subnet-backend'
-var nsgName = 'nsg-udp'
-var lbName = 'lb-udp'
-var lbPublicIPName = 'pip-lb-udp'
+var nsgName = 'nsg-udp-${resourceGroup().name}'
+var lbName = 'lb-udp-${resourceGroup().name}'
+var lbPublicIPName = 'pip-lb-udp-${resourceGroup().name}'
 var lbBackendPoolName = 'backendPool'
 var lbProbeName = 'healthProbe'
 
@@ -112,7 +116,7 @@ resource lbPublicIP 'Microsoft.Network/publicIPAddresses@2023-05-01' = {
 }
 
 resource vmPublicIP 'Microsoft.Network/publicIPAddresses@2023-05-01' = [for i in range(0, vmCount): {
-    name: 'pip-vm${i}'
+    name: 'pip-vm${i}-${resourceGroup().name}'
     location: location
     sku: {
         name: 'Standard'
@@ -275,7 +279,7 @@ resource availabilitySet 'Microsoft.Compute/availabilitySets@2023-03-01' = {
 }
 
 resource proximityPlacementGroup 'Microsoft.Compute/proximityPlacementGroups@2023-03-01' = {
-    name: 'ppg-udp'
+    name: 'ppg-udp-${resourceGroup().name}'
     location: location
     properties: {
         proximityPlacementGroupType: 'Standard'
@@ -343,6 +347,28 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = [for i in range(0, 
                     properties: {
                         primary: false
                     }
+                    id: nic1[i].id
+                    properties: {
+                        primary: true
+                    }
+                }
+                {
+                    id: nic2[i].id
+                    properties: {
+                        primary: false
+                    }
+                }
+                {
+                    id: nic3[i].id
+                    properties: {
+                        primary: false
+                    }
+                }
+                {
+                    id: nic4[i].id
+                    properties: {
+                        primary: false
+                    }
                 }
             ]
         }
@@ -361,6 +387,9 @@ resource vmExtension 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' =
         settings: {
             fileUris: [
                 udpListenerScriptUrl
+                udpSenderScriptUrl
+                tcpListenerScriptUrl
+                tcpSenderScriptUrl
                 udpSenderScriptUrl
                 tcpListenerScriptUrl
                 tcpSenderScriptUrl

@@ -107,118 +107,18 @@ try {
     
     # $trigger = New-ScheduledTaskTrigger -AtStartup
     
-    # $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
-    #     -LogonType ServiceAccount `
-    #     -RunLevel Highest
-
-    # $settings = New-ScheduledTaskSettingsSet -Disabled
-
-    # Register-ScheduledTask -TaskName 'UDPListener' `
-    #     -Action $action `
-    #     -Trigger $trigger `
-    #     -Principal $principal `
-    #     -Settings $settings `
-    #     -Force | Out-Null
-
-    # Write-Host "UDPListener task created (disabled)."
-
-    # Write-Host "Creating scheduled task for TCP Listener..."
-    # $tcpAction = New-ScheduledTaskAction -Execute 'PowerShell.exe' `
-    #     -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\UDPListener\TCPListener.ps1 -Port $Port -IPAddress $privateIP"
-    
-    # $tcpTrigger = New-ScheduledTaskTrigger -AtStartup
-    
-    # $tcpPrincipal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
-    #     -LogonType ServiceAccount `
-    #     -RunLevel Highest
-
-    # $tcpSettings = New-ScheduledTaskSettingsSet -Disabled
-
-    # Register-ScheduledTask -TaskName 'TCPListener' `
-    #     -Action $tcpAction `
-    #     -Trigger $tcpTrigger `
-    #     -Principal $tcpPrincipal `
-    #     -Settings $tcpSettings `
-    #     -Force | Out-Null
-
-    # Write-Host "TCPListener task created (disabled)."
-
-    # Create scheduled task to install winget and Windows Terminal (delayed start)
-    Write-Log "Creating scheduled task for software installation (delayed 2 minutes after startup)..."
-    $installScriptContent = @'
-$LogFile = "C:\UDPListener\SoftwareInstall.log"
-function Write-Log {
-    param([string]$Message, [string]$Level = "INFO")
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logMessage = "[$timestamp] [$Level] $Message"
-    Add-Content -Path $LogFile -Value $logMessage -Force
-}
-
-Write-Log "Starting software installation..."
-
-# Install winget using asheroto script
-Write-Log "Installing winget..."
-try {
-    irm asheroto.com/winget | iex
-    Write-Log "winget installed successfully."
-}
-catch {
-    Write-Log "Failed to install winget: $($_.Exception.Message)" "ERROR"
-}
-
-# Install Windows Terminal
-Write-Log "Installing Windows Terminal..."
-try {
-    $wingetPath = "$env:ProgramFiles\WindowsApps\Microsoft.DesktopAppInstaller_*_x64__8wekyb3d8bbwe\winget.exe"
-    $wingetExe = Get-Item $wingetPath -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-    
-    if (-not $wingetExe) {
-        $wingetPath = "C:\Windows\System32\WindowsApps\winget.exe"
-        if (Test-Path $wingetPath) {
-            $wingetExe = $wingetPath
-        }
-    }
-    
-    if ($wingetExe) {
-        Write-Log "Found winget at: $wingetExe"
-        & $wingetExe install --id Microsoft.WindowsTerminal --silent --accept-package-agreements --accept-source-agreements
-        Write-Log "Windows Terminal installed successfully."
-    }
-    else {
-        Write-Log "winget not available, skipping Windows Terminal installation." "WARN"
-    }
-}
-catch {
-    Write-Log "Failed to install Windows Terminal: $($_.Exception.Message)" "ERROR"
-}
-
-Write-Log "Software installation completed."
-'@
-    
-    $installScriptPath = 'C:\UDPListener\InstallSoftware.ps1'
-    Set-Content -Path $installScriptPath -Value $installScriptContent -Force
-    Write-Log "Created installation script at: $installScriptPath"
-    
-    $installAction = New-ScheduledTaskAction -Execute 'PowerShell.exe' `
-        -Argument "-NoProfile -ExecutionPolicy Bypass -File $installScriptPath"
-    
-    $installTrigger = New-ScheduledTaskTrigger -AtStartup
-    $installTrigger.Delay = 'PT2M'  # 2 minute delay
-    
-    $installPrincipal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
+    $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
         -LogonType ServiceAccount `
         -RunLevel Highest
-    
-    $installSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-    
-    Register-ScheduledTask -TaskName 'InstallSoftware' `
-        -Action $installAction `
-        -Trigger $installTrigger `
-        -Principal $installPrincipal `
-        -Settings $installSettings `
+
+    Register-ScheduledTask -TaskName 'UDPListener' `
+        -Action $action `
+        -Trigger $trigger `
+        -Principal $principal `
         -Force | Out-Null
-    
-    Write-Log "InstallSoftware scheduled task created with 2-minute delay."
+
+    Write-Host "Starting UDPListener task..."
+    Start-ScheduledTask -TaskName 'UDPListener'
 
     Write-Log "Configuration completed successfully!"
     exit 0
