@@ -4,22 +4,42 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$LogFile = 'C:\UDPListener\ConfigureVM.log'
+
+function Write-Log {
+    param([string]$Message, [string]$Level = 'INFO')
+    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    $logMessage = "[$timestamp] [$Level] $Message"
+    Add-Content -Path $LogFile -Value $logMessage -Force
+    Write-Output $logMessage
+}
 
 try {
-    Write-Host "Creating UDPListener directory..."
+    # Ensure log directory exists
+    New-Item -ItemType Directory -Path 'C:\UDPListener' -Force | Out-Null
+    
+    Write-Log "Starting ConfigureVM script with Port: $Port"
     New-Item -ItemType Directory -Path 'C:\UDPListener' -Force | Out-Null
 
-    Write-Host "Getting private IP address..."
-    $privateIP = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias 'Ethernet*' | 
+    Write-Log "Getting private IP address from primary NIC..."
+    $primaryNic = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | Sort-Object ifIndex | Select-Object -First 1
+    
+    if (-not $primaryNic) {
+        throw "Could not find active network adapter"
+    }
+    
+    Write-Log "Primary NIC: $($primaryNic.Name) (ifIndex: $($primaryNic.ifIndex))"
+    
+    $privateIP = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceIndex $primaryNic.ifIndex | 
         Where-Object {$_.IPAddress -like '10.*'}).IPAddress
     
     if (-not $privateIP) {
-        throw "Could not find private IP address starting with 10.*"
+        throw "Could not find private IP address starting with 10.* on primary NIC"
     }
     
-    Write-Host "Private IP: $privateIP"
+    Write-Log "Private IP: $privateIP"
 
-    Write-Host "Locating downloaded UDPListener.ps1 script..."
+    Write-Log "Locating downloaded UDPListener.ps1 script..."
     $scriptPath = Get-ChildItem -Path 'C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension' `
         -Recurse `
         -Filter 'UDPListener.ps1' `
@@ -30,11 +50,11 @@ try {
         throw "UDPListener.ps1 not found in extension directory"
     }
 
-    Write-Host "Found script at: $scriptPath"
-    Write-Host "Copying to C:\UDPListener..."
+    Write-Log "Found script at: $scriptPath"
+    Write-Log "Copying to C:\UDPListener..."
     Copy-Item $scriptPath -Destination 'C:\UDPListener\UDPListener.ps1' -Force
 
-    Write-Host "Locating downloaded UDPSender.ps1 script..."
+    Write-Log "Locating downloaded UDPSender.ps1 script..."
     $senderScriptPath = Get-ChildItem -Path 'C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension' `
         -Recurse `
         -Filter 'UDPSender.ps1' `
@@ -45,11 +65,11 @@ try {
         throw "UDPSender.ps1 not found in extension directory"
     }
 
-    Write-Host "Found script at: $senderScriptPath"
-    Write-Host "Copying to C:\UDPListener..."
+    Write-Log "Found script at: $senderScriptPath"
+    Write-Log "Copying to C:\UDPListener..."
     Copy-Item $senderScriptPath -Destination 'C:\UDPListener\UDPSender.ps1' -Force
 
-    Write-Host "Locating downloaded TCPListener.ps1 script..."
+    Write-Log "Locating downloaded TCPListener.ps1 script..."
     $tcpListenerScriptPath = Get-ChildItem -Path 'C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension' `
         -Recurse `
         -Filter 'TCPListener.ps1' `
@@ -57,15 +77,15 @@ try {
         Select-Object -First 1 -ExpandProperty FullName
 
     if ($tcpListenerScriptPath) {
-        Write-Host "Found script at: $tcpListenerScriptPath"
-        Write-Host "Copying to C:\UDPListener..."
+        Write-Log "Found script at: $tcpListenerScriptPath"
+        Write-Log "Copying to C:\UDPListener..."
         Copy-Item $tcpListenerScriptPath -Destination 'C:\UDPListener\TCPListener.ps1' -Force
     }
     else {
-        Write-Host "Warning: TCPListener.ps1 not found in extension directory" -ForegroundColor Yellow
+        Write-Log "Warning: TCPListener.ps1 not found in extension directory" "WARN"
     }
 
-    Write-Host "Locating downloaded TCPSender.ps1 script..."
+    Write-Log "Locating downloaded TCPSender.ps1 script..."
     $tcpSenderScriptPath = Get-ChildItem -Path 'C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension' `
         -Recurse `
         -Filter 'TCPSender.ps1' `
@@ -73,12 +93,12 @@ try {
         Select-Object -First 1 -ExpandProperty FullName
 
     if ($tcpSenderScriptPath) {
-        Write-Host "Found script at: $tcpSenderScriptPath"
-        Write-Host "Copying to C:\UDPListener..."
+        Write-Log "Found script at: $tcpSenderScriptPath"
+        Write-Log "Copying to C:\UDPListener..."
         Copy-Item $tcpSenderScriptPath -Destination 'C:\UDPListener\TCPSender.ps1' -Force
     }
     else {
-        Write-Host "Warning: TCPSender.ps1 not found in extension directory" -ForegroundColor Yellow
+        Write-Log "Warning: TCPSender.ps1 not found in extension directory" "WARN"
     }
 
     # Write-Host "Creating scheduled task for UDP Listener..."
@@ -87,52 +107,29 @@ try {
     
     # $trigger = New-ScheduledTaskTrigger -AtStartup
     
-    # $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
-    #     -LogonType ServiceAccount `
-    #     -RunLevel Highest
+    $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
+        -LogonType ServiceAccount `
+        -RunLevel Highest
 
-    # $settings = New-ScheduledTaskSettingsSet -Disabled
+    Register-ScheduledTask -TaskName 'UDPListener' `
+        -Action $action `
+        -Trigger $trigger `
+        -Principal $principal `
+        -Force | Out-Null
 
-    # Register-ScheduledTask -TaskName 'UDPListener' `
-    #     -Action $action `
-    #     -Trigger $trigger `
-    #     -Principal $principal `
-    #     -Settings $settings `
-    #     -Force | Out-Null
+    Write-Host "Starting UDPListener task..."
+    Start-ScheduledTask -TaskName 'UDPListener'
 
-    # Write-Host "UDPListener task created (disabled)."
-
-    # Write-Host "Creating scheduled task for TCP Listener..."
-    # $tcpAction = New-ScheduledTaskAction -Execute 'PowerShell.exe' `
-    #     -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\UDPListener\TCPListener.ps1 -Port $Port -IPAddress $privateIP"
-    
-    # $tcpTrigger = New-ScheduledTaskTrigger -AtStartup
-    
-    # $tcpPrincipal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' `
-    #     -LogonType ServiceAccount `
-    #     -RunLevel Highest
-
-    # $tcpSettings = New-ScheduledTaskSettingsSet -Disabled
-
-    # Register-ScheduledTask -TaskName 'TCPListener' `
-    #     -Action $tcpAction `
-    #     -Trigger $tcpTrigger `
-    #     -Principal $tcpPrincipal `
-    #     -Settings $tcpSettings `
-    #     -Force | Out-Null
-
-    # Write-Host "TCPListener task created (disabled)."
-
-    Write-Host "Configuration completed successfully!"
+    Write-Log "Configuration completed successfully!"
     exit 0
 }
 catch {
-    Write-Error "Configuration failed: $_"
-    Write-Error $_.Exception.Message
-    Write-Error $_.ScriptStackTrace
+    $errorMsg = "Configuration failed: $_ | $($_.Exception.Message) | $($_.ScriptStackTrace)"
+    Write-Log $errorMsg "ERROR"
+    Write-Error $errorMsg
     exit 1
 }
 
 finally {
-    Write-Host "Exiting ConfigureVM script."
+    Write-Log "Exiting ConfigureVM script."
 }
