@@ -37,19 +37,6 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2023-05-01' = {
     properties: {
         securityRules: [
             {
-                name: 'AllowHealthProbe'
-                properties: {
-                    protocol: 'Tcp'
-                    sourcePortRange: '*'
-                    destinationPortRange: '3389'
-                    sourceAddressPrefix: 'AzureLoadBalancer'
-                    destinationAddressPrefix: '*'
-                    access: 'Allow'
-                    priority: 99
-                    direction: 'Inbound'
-                }
-            }
-            {
                 name: 'AllowUDP500'
                 properties: {
                     protocol: 'Udp'
@@ -59,6 +46,19 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2023-05-01' = {
                     destinationAddressPrefix: '*'
                     access: 'Allow'
                     priority: 100
+                    direction: 'Inbound'
+                }
+            }
+            {
+                name: 'AllowHealthProbe'
+                properties: {
+                    protocol: 'Tcp'
+                    sourcePortRange: '*'
+                    destinationPortRange: '3389'
+                    sourceAddressPrefix: 'AzureLoadBalancer'
+                    destinationAddressPrefix: '*'
+                    access: 'Allow'
+                    priority: 101
                     direction: 'Inbound'
                 }
             }
