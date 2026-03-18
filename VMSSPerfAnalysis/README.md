@@ -1,38 +1,28 @@
 # VMSSPerfAnalysis
 
-This folder contains a Bicep template and helper script to deploy a VM Scale Set that runs `sysbench` on each instance and sends results to an Azure Log Analytics workspace.
+Deploys a Linux VM Scale Set and runs `sysbench` on each instance via cloud-init. Each instance posts its output to a Log Analytics custom table (`SysbenchPerf_CL`).
 
-Files:
-- `VMSSPerf.bicep` - Bicep template that creates VNet, Log Analytics workspace, VMSS, and a CustomScript extension to run sysbench and post results.
-- `sysbench-report.sh` - Helper script to run sysbench and post to Log Analytics (useful for manual testing).
+## Files
+- `VMSSPerf.bicep`: VMSS + VNet + NAT + Log Analytics deployment.
+- `sysbench-report.sh`: standalone helper script for manual testing on a VM.
 
-Quick deploy example:
-
+## Validate
 ```powershell
-# create resource group
-az group create -n my-rg -l eastus
-
-# get Log Analytics workspace key (if using an existing workspace)
-az monitor log-analytics workspace get-shared-keys -g my-rg -n my-workspace
-
-# deploy template (supply your SSH public key and the workspace key)
-az deployment group create -g my-rg --template-file VMSSPerfAnalysis\VMSSPerf.bicep --parameters adminSshKey="ssh-rsa AAAA..." workspaceKey="<WORKSPACE_KEY>"
+az group create -n vmssperf-test-rg -l eastus
+$ssh = Get-Content "$HOME\.ssh\vmssperf_test.pub" -Raw
+az deployment group validate -g vmssperf-test-rg --template-file VMSSPerfAnalysis\VMSSPerf.bicep --parameters adminSshKey="$ssh"
 ```
 
-Validation (dry-run):
-
+## Deploy
 ```powershell
-az deployment group validate -g my-rg --template-file VMSSPerfAnalysis\VMSSPerf.bicep --parameters adminSshKey="ssh-rsa AAAA..." workspaceKey="<WORKSPACE_KEY>"
+$rg = 'vmssperf-rg'
+az group create -n $rg -l eastus
+$ssh = Get-Content "$HOME\.ssh\vmssperf_test.pub" -Raw
+az deployment group create -g $rg --template-file VMSSPerfAnalysis\VMSSPerf.bicep --parameters adminSshKey="$ssh" instanceCount=10 sysbenchTime=30
 ```
 
-Log query example:
-
+## Query Results
+```powershell
+$workspaceId = az monitor log-analytics workspace show -g vmssperf-rg -n sysbench-vmss-law --query customerId -o tsv
+az monitor log-analytics query -w $workspaceId --analytics-query "SysbenchPerf_CL | sort by TimeGenerated desc | take 20"
 ```
-SysbenchPerf_CL
-| sort by TimeGenerated desc
-| take 50
-```
-
-Notes:
-- The template passes the Log Analytics shared key in `protectedSettings` for the extension so it does not appear in deployment history.
-- Costs will be incurred for VMs and Log Analytics ingestion.

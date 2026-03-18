@@ -1,69 +1,161 @@
 @description('Name for the VMSS')
 param vmssName string = 'sysbench-vmss'
+
 @description('Admin username for VM instances')
 param adminUsername string = 'azureuser'
+
 @description('SSH public key for admin user')
 param adminSshKey string
+
 @description('Number of VM instances in the scale set')
 param instanceCount int = 10
+
 @description('Sysbench run duration in seconds')
 param sysbenchTime int = 30
+
+@description('VM size for the VMSS instances')
+param vmSize string = 'Standard_D2s_v3'
+
 @description('Virtual network address prefix')
 param vnetPrefix string = '10.0.0.0/16'
+
 @description('Subnet prefix')
 param subnetPrefix string = '10.0.0.0/24'
+
 @description('Log Analytics workspace name')
 param workspaceName string = '${vmssName}-law'
-@description('Log Analytics shared key (supply via secure param or fetch prior to deploy)')
-@secure()
-param workspaceKey string
 
-var vmSize = 'Standard_B2s'
+@description('Azure region for all resources')
+param location string = resourceGroup().location
+
 var imagePublisher = 'Canonical'
 var imageOffer = '0001-com-ubuntu-server-focal'
 var imageSku = '20_04-lts-gen2'
 
 resource law 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
   name: workspaceName
-  location: resourceGroup().location
+  location: location
   properties: {
-    sku: { name: 'PerGB2018' }
+    sku: {
+      name: 'PerGB2018'
+    }
     retentionInDays: 30
   }
 }
 
-resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
-  name: '${vmssName}-vnet'
-  location: resourceGroup().location
+resource natPublicIp 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
+  name: '${vmssName}-nat-pip'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
   properties: {
-    addressSpace: { addressPrefixes: [vnetPrefix] }
-    subnets: [
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource natGateway 'Microsoft.Network/natGateways@2023-09-01' = {
+  name: '${vmssName}-nat'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIpAddresses: [
       {
-        name: 'subnet1'
-        properties: { addressPrefix: subnetPrefix }
+        id: natPublicIp.id
       }
     ]
   }
 }
 
-resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2022-03-01' = {
-  name: vmssName
-  location: resourceGroup().location
-  sku: { name: vmSize; capacity: instanceCount }
+resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
+  name: '${vmssName}-vnet'
+  location: location
   properties: {
-    upgradePolicy: { mode: 'Manual' }
-    virtualMachineProfile: {
-      storageProfile: {
-        imageReference: {
-          publisher: imagePublisher
-          offer: imageOffer
-          sku: imageSku
-          version: 'latest'
+    addressSpace: {
+      addressPrefixes: [
+        vnetPrefix
+      ]
+    }
+    subnets: [
+      {
+        name: 'subnet1'
+        properties: {
+          addressPrefix: subnetPrefix
+          natGateway: {
+            id: natGateway.id
+          }
         }
       }
+    ]
+  }
+}
+
+var workspaceKey = listKeys(law.id, law.apiVersion).primarySharedKey
+var workspaceCustomerId = reference(law.id, law.apiVersion).customerId
+
+var cloudInitScript = concat(
+  '#!/bin/bash\n',
+  'set -euxo pipefail\n',
+  '\n',
+  'workspaceId="', workspaceCustomerId, '"\n',
+  'workspaceKey="', workspaceKey, '"\n',
+  'duration="', string(sysbenchTime), '"\n',
+  'hostName=$(hostname)\n',
+  'outputFile=/var/log/sysbench-$hostName.log\n',
+  '\n',
+  'export DEBIAN_FRONTEND=noninteractive\n',
+  'apt-get update -y\n',
+  'apt-get install -y sysbench python3 curl\n',
+  'sysbench cpu --threads=$(nproc) --time=$duration run > $outputFile 2>&1 || true\n',
+  '\n',
+  'payload=$(python3 - <<PY\n',
+  'import json, socket\n',
+  'h = socket.gethostname()\n',
+  'p = f"/var/log/sysbench-{h}.log"\n',
+  'with open(p, "r", errors="ignore") as f:\n',
+  '    print(json.dumps({"Host": h, "Output": f.read()}))\n',
+  'PY\n',
+  ')\n',
+  'dateString=$(date -u +"%a, %d %b %Y %H:%M:%S GMT")\n',
+  'contentLength=$(printf "%s" "$payload" | wc -c)\n',
+  'resourcePath="/api/logs"\n',
+  'stringToSign="POST\\n$contentLength\\napplication/json\\nx-ms-date:$dateString\\n$resourcePath"\n',
+  '\n',
+  'signature=$(python3 -c "import base64,hmac,hashlib,sys;print(base64.b64encode(hmac.new(base64.b64decode(sys.argv[1]),sys.argv[2].encode(),hashlib.sha256).digest()).decode())" "$workspaceKey" "$stringToSign")\n',
+  '\n',
+  'authHeader="SharedKey $workspaceId:$signature"\n',
+  'url="https://$workspaceId.ods.opinsights.azure.com$resourcePath?api-version=2016-04-01"\n',
+  '\n',
+  'curl -sS -X POST \\\n',
+  '  -H "Content-Type: application/json" \\\n',
+  '  -H "Authorization: $authHeader" \\\n',
+  '  -H "Log-Type: SysbenchPerf" \\\n',
+  '  -H "x-ms-date: $dateString" \\\n',
+  '  -d "$payload" \\\n',
+  '  "$url" || true\n'
+)
+
+resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2023-09-01' = {
+  name: vmssName
+  location: location
+  sku: {
+    name: vmSize
+    tier: 'Standard'
+    capacity: instanceCount
+  }
+  properties: {
+    singlePlacementGroup: false
+    overprovision: false
+    upgradePolicy: {
+      mode: 'Manual'
+    }
+    virtualMachineProfile: {
       osProfile: {
         computerNamePrefix: vmssName
         adminUsername: adminUsername
+        customData: base64(cloudInitScript)
         linuxConfiguration: {
           disablePasswordAuthentication: true
           ssh: {
@@ -76,6 +168,21 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2022-03-01' = {
           }
         }
       }
+      storageProfile: {
+        imageReference: {
+          publisher: imagePublisher
+          offer: imageOffer
+          sku: imageSku
+          version: 'latest'
+        }
+        osDisk: {
+          createOption: 'FromImage'
+          caching: 'ReadWrite'
+          managedDisk: {
+            storageAccountType: 'StandardSSD_LRS'
+          }
+        }
+      }
       networkProfile: {
         networkInterfaceConfigurations: [
           {
@@ -85,7 +192,11 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2022-03-01' = {
               ipConfigurations: [
                 {
                   name: 'ipconfig1'
-                  properties: { subnet: { id: vnet.properties.subnets[0].id } }
+                  properties: {
+                    subnet: {
+                      id: vnet.properties.subnets[0].id
+                    }
+                  }
                 }
               ]
             }
@@ -96,47 +207,6 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2022-03-01' = {
   }
 }
 
-/* Custom script extension: writes a helper script to /tmp, runs sysbench, and posts output to Log Analytics. */
-resource vmssExtension 'Microsoft.Compute/virtualMachineScaleSets/extensions@2022-03-01' = {
-  name: '${vmss.name}/sysbenchScript'
-  parent: vmss
-  properties: {
-    publisher: 'Microsoft.Azure.Extensions'
-    type: 'CustomScript'
-    typeHandlerVersion: '2.1'
-    settings: { commandToExecute: '' }
-    protectedSettings: {
-      commandToExecute: join([
-        '/bin/bash -c "',
-        'cat > /tmp/sysbench-report.sh <<\'EOF\'\n',
-        '#!/usr/bin/env bash\n',
-        'set -euo pipefail\n',
-        'workspaceId="', law.name, '"\n',
-        'workspaceKey="', workspaceKey, '"\n',
-        'duration=', sysbenchTime, '\n',
-        'HOSTNAME=$(hostname)\n',
-        'OUTPUT_FILE=/tmp/sysbench-${HOSTNAME}.log\n',
-        'apt-get update -y\n',
-        'apt-get install -y sysbench python3 python3-pip curl jq >/dev/null\n',
-        'sysbench cpu --threads=$(nproc) --time=${duration} run > ${OUTPUT_FILE} 2>&1 || true\n',
-        '\n',
-        'payload=$(jq -Rs --arg host "${HOSTNAME}" \'{Host: $host, Output: .}\' < ${OUTPUT_FILE})\n',
-        'dateString=$(date -u +"%a, %d %b %Y %H:%M:%S GMT")\n',
-        'contentLength=$(printf "%s" "$payload" | wc -c)\n',
-        'resourcePath="/api/logs"\n',
-        'stringToSign="POST\\n${contentLength}\\napplication/json\\nx-ms-date:${dateString}\\n${resourcePath}"\n',
-        'signature=$(python3 - <<PY\nimport sys, hmac, hashlib, base64\nkey = base64.b64decode(sys.argv[1])\nsig = hmac.new(key, sys.argv[2].encode("utf-8"), hashlib.sha256).digest()\nprint(base64.b64encode(sig).decode())\nPY\n"', workspaceKey, '" "', '$stringToSign', '" )\n',
-        'authHeader="SharedKey ${workspaceId}:${signature}"\n',
-        'url="https://${workspaceId}.ods.opinsights.azure.com${resourcePath}?api-version=2016-04-01"\n',
-        'curl -s -S -H "Content-Type: application/json" -H "Authorization: ${authHeader}" -H "Log-Type: SysbenchPerf" -H "x-ms-date: ${dateString}" -d "$payload" "$url" || true\n',
-        'EOF\n',
-        'chmod +x /tmp/sysbench-report.sh\n',
-        '/tmp/sysbench-report.sh\n',
-        '"'
-      ], '')
-    }
-  }
-}
-
-output workspaceCustomerId string = law.name
+output workspaceNameOut string = law.name
+output workspaceIdOut string = law.properties.customerId
 output vmssNameOut string = vmss.name
