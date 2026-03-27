@@ -1,0 +1,327 @@
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+properties:
+  resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: copilotCli
+      directives:
+        description: Install GitHub Copilot CLI
+      settings:
+        id: GitHub.Copilot
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azureStorageExplorer
+      directives:
+        description: Install Azure Storage Explorer
+      settings:
+        id: Microsoft.Azure.StorageExplorer
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: windowsTerminal
+      directives:
+        description: Install Windows Terminal
+      settings:
+        id: 9N0DX20HK701
+        source: msstore
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: appleMobileDeviceSupport
+      directives:
+        description: Install Apple Mobile Device Support
+      settings:
+        id: Apple.AppleMobileDeviceSupport
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: quicken
+      directives:
+        description: Install Quicken
+      settings:
+        id: Quicken.Quicken
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: googleDrive
+      directives:
+        description: Install Google Drive
+      settings:
+        id: Google.GoogleDrive
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: zoom
+      directives:
+        description: Install Zoom
+      settings:
+        id: Zoom.Zoom
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: earTrumpet
+      directives:
+        description: Install EarTrumpet
+      settings:
+        id: 9NBLGGH516XP
+        source: msstore
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: powershell
+      directives:
+        description: Install PowerShell
+      settings:
+        id: 9MZ1SNWT0N5D
+        source: msstore
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: powerBi
+      directives:
+        description: Install Power BI
+      settings:
+        id: Microsoft.PowerBI
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: chrome
+      directives:
+        description: Install Google Chrome
+      settings:
+        id: Google.Chrome
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: git
+      directives:
+        description: Install Git
+      settings:
+        id: Git.Git
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: visualStudioCommunity2022
+      directives:
+        description: Install Visual Studio 2022 Community
+        securityContext: elevated
+      settings:
+        id: Microsoft.VisualStudio.2022.Community
+        source: winget
+    - resource: Microsoft.VisualStudio.DSC/VSComponents
+      id: visualStudioComponents
+      dependsOn:
+        - visualStudioCommunity2022
+      directives:
+        description: Install Visual Studio workloads from base.vsconfig
+        securityContext: elevated
+      settings:
+        productId: Microsoft.VisualStudio.Product.Community
+        channelId: VisualStudio.17.Release
+        vsConfigFile: ${WinGetConfigRoot}\base.vsconfig
+        includeRecommended: true
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: visualStudioCode
+      directives:
+        description: Install Visual Studio Code
+      settings:
+        id: XP9KHM4BK9FZ7Q
+        source: msstore
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: wireshark
+      directives:
+        description: Install Wireshark
+      settings:
+        id: WiresharkFoundation.Wireshark
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azureCli
+      directives:
+        description: Optional - Install Azure CLI
+      settings:
+        id: Microsoft.AzureCLI
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: microsoftOffice
+      directives:
+        description: Optional - Install Microsoft Office
+      settings:
+        id: Microsoft.Office
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: oneDrive
+      directives:
+        description: Optional - Install OneDrive
+      settings:
+        id: Microsoft.OneDrive
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: teams
+      directives:
+        description: Optional - Install Microsoft Teams
+      settings:
+        id: XP8BT8DW290MPQ
+        source: msstore
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: windowsSubsystemForLinux
+      directives:
+        description: Optional - Install Windows Subsystem for Linux
+      settings:
+        id: Microsoft.WSL
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: plex
+      directives:
+        description: Optional - Install Plex
+      settings:
+        id: Plex.Plex
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: unityHub
+      directives:
+        description: Optional - Install Unity Hub
+      settings:
+        id: Unity.UnityHub
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: visualStudioEnterprise2022
+      directives:
+        description: Optional - Install Visual Studio 2022 Enterprise (alternative to Community)
+        securityContext: elevated
+      settings:
+        id: Microsoft.VisualStudio.2022.Enterprise
+        source: winget
+
+    # Optional packages (uncomment to enable)
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: iTunes
+    #   directives:
+    #     description: Optional - Install iTunes
+    #   settings:
+    #     id: Apple.iTunes
+    #     source: winget
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: powerToys
+    #   directives:
+    #     description: Optional - Install PowerToys
+    #   settings:
+    #     id: Microsoft.PowerToys
+    #     source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: sqlClrTypes2019
+      directives:
+        description: Dependency - SQL CLR Types 2019
+      settings:
+        id: Microsoft.CLRTypesSQLServer.2019
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: msodbcsql17
+      directives:
+        description: Dependency - Microsoft ODBC Driver 17 for SQL Server
+      settings:
+        id: Microsoft.msodbcsql.17
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: uiXaml27
+      directives:
+        description: Dependency - Microsoft UI XAML 2.7
+      settings:
+        id: Microsoft.UI.Xaml.2.7
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: uiXaml28
+      directives:
+        description: Dependency - Microsoft UI XAML 2.8
+      settings:
+        id: Microsoft.UI.Xaml.2.8
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: vcLibsDesktop14
+      directives:
+        description: Dependency - Microsoft VCLibs Desktop 14
+      settings:
+        id: Microsoft.VCLibs.Desktop.14
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: vcRedist2015x64
+      directives:
+        description: Dependency - Microsoft Visual C++ Redistributable 2015+ x64
+      settings:
+        id: Microsoft.VCRedist.2015+.x64
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: vcRedist2015x86
+      directives:
+        description: Dependency - Microsoft Visual C++ Redistributable 2015+ x86
+      settings:
+        id: Microsoft.VCRedist.2015+.x86
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: vstor
+      directives:
+        description: Dependency - Visual Studio Tools for Office Runtime
+      settings:
+        id: Microsoft.VSTOR
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: webDeploy
+      directives:
+        description: Dependency - Web Deploy
+      settings:
+        id: Microsoft.WebDeploy
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: windowsSdk26100
+      directives:
+        description: Dependency - Windows SDK 10.0.26100
+      settings:
+        id: Microsoft.WindowsSDK.10.0.26100
+        source: winget
+
+    - resource: PSDscResources/Registry
+      id: enableDeveloperMode
+      directives:
+        description: Enable Developer Mode (non-default setting detected)
+        securityContext: elevated
+      settings:
+        Ensure: Present
+        Key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock
+        ValueName: AllowDevelopmentWithoutDevLicense
+        ValueType: Dword
+        ValueData: 1
+    - resource: PSDscResources/Registry
+      id: showFileExtensions
+      directives:
+        description: Show file extensions in Explorer (non-default setting detected)
+      settings:
+        Ensure: Present
+        Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+        ValueName: HideFileExt
+        ValueType: Dword
+        ValueData: 0
+    - resource: PSDscResources/Registry
+      id: darkThemeApps
+      directives:
+        description: Use dark app theme (non-default setting detected)
+      settings:
+        Ensure: Present
+        Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize
+        ValueName: AppsUseLightTheme
+        ValueType: Dword
+        ValueData: 0
+    - resource: PSDscResources/Registry
+      id: darkThemeSystem
+      directives:
+        description: Use dark system theme (non-default setting detected)
+      settings:
+        Ensure: Present
+        Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize
+        ValueName: SystemUsesLightTheme
+        ValueType: Dword
+        ValueData: 0
+    - resource: PSDscResources/Script
+      id: vpnScheduledTask
+      directives:
+        description: Create VPN scheduled task from XML
+        securityContext: elevated
+      settings:
+        GetScript: |
+          $taskName = 'VPN Connection on Logon and Unlock'
+          $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+          if ($null -ne $task) { return @{ Result = 'Present' } }
+          return @{ Result = 'Absent' }
+        TestScript: |
+          $taskName = 'VPN Connection on Logon and Unlock'
+          $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+          return ($null -ne $task)
+        SetScript: |
+          $taskName = 'VPN Connection on Logon and Unlock'
+          $xmlPath = Join-Path '${WinGetConfigRoot}' 'VPN Connection on Logon and Unlock.xml'
+          $xmlContent = Get-Content -Path $xmlPath -Raw
+          Register-ScheduledTask -TaskName $taskName -Xml $xmlContent -Force | Out-Null
+  configurationVersion: 0.2.0
