@@ -86,17 +86,24 @@ properties:
         id: Git.Git
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: visualStudioCommunity2022
+      id: python
       directives:
-        description: Install Visual Studio 2022 Community
+        description: Install Python
+      settings:
+        id: Python.Python.3.13
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: visualStudioCommunity
+      directives:
+        description: Install latest Visual Studio Community
         securityContext: elevated
       settings:
-        id: Microsoft.VisualStudio.2022.Community
+        id: Microsoft.VisualStudio.Community
         source: winget
     - resource: Microsoft.VisualStudio.DSC/VSComponents
       id: visualStudioComponents
       dependsOn:
-        - visualStudioCommunity2022
+        - visualStudioCommunity
       directives:
         description: Install Visual Studio workloads from base.vsconfig
         securityContext: elevated
@@ -169,12 +176,97 @@ properties:
         id: Unity.UnityHub
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: visualStudioEnterprise2022
+      id: githubCli
       directives:
-        description: Optional - Install Visual Studio 2022 Enterprise (alternative to Community)
+        description: Optional - Install GitHub CLI
+      settings:
+        id: GitHub.cli
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: remoteHelp
+      directives:
+        description: Optional - Install Remote Help
+      settings:
+        id: Microsoft.RemoteHelp
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: azureVpnClient
+      directives:
+        description: Optional - Install Azure VPN Client
+      settings:
+        id: Microsoft.AzureVPNClient
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: visualStudioProfessional
+      directives:
+        description: Optional - Install latest Visual Studio Professional
         securityContext: elevated
       settings:
-        id: Microsoft.VisualStudio.2022.Enterprise
+        id: Microsoft.VisualStudio.Professional
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: webDeploy
+      directives:
+        description: Optional - Install Microsoft Web Deploy
+      settings:
+        id: Microsoft.WebDeploy
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: powerToys
+      directives:
+        description: Optional - Install PowerToys
+      settings:
+        id: Microsoft.PowerToys
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: nvmWindows
+      directives:
+        description: Optional - Install NVM for Windows (Node Version Manager)
+      settings:
+        id: CoreyButler.NVMforWindows
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: windowsSdk
+      directives:
+        description: Optional - Install Windows SDK
+        securityContext: elevated
+      settings:
+        id: Microsoft.WindowsSDK.10.0.26100
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: anaconda3
+      directives:
+        description: Optional - Install Anaconda3 (Python with Conda)
+      settings:
+        id: Anaconda.Anaconda3
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: spotify
+      directives:
+        description: Optional - Install Spotify
+      settings:
+        id: SpotifyAB.SpotifyMusic
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: whatsapp
+      directives:
+        description: Optional - Install WhatsApp
+      settings:
+        id: 5319275A.WhatsAppDesktop
+        source: msstore
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: globalProtect
+      directives:
+        description: Optional - Install Palo Alto GlobalProtect VPN
+      settings:
+        id: PaloAltoNetworks.GlobalProtect
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: ironPython3
+      directives:
+        description: Optional - Install IronPython 3
+      settings:
+        id: Microsoft.IronPython.3
         source: winget
 
     # Optional packages (uncomment to enable)
@@ -184,13 +276,6 @@ properties:
     #     description: Optional - Install iTunes
     #   settings:
     #     id: Apple.iTunes
-    #     source: winget
-    # - resource: Microsoft.WinGet.DSC/WinGetPackage
-    #   id: powerToys
-    #   directives:
-    #     description: Optional - Install PowerToys
-    #   settings:
-    #     id: Microsoft.PowerToys
     #     source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: sqlClrTypes2019
