@@ -1,0 +1,68 @@
+name: Build and Release ConnectionTrackerEverywhere
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Generate timestamp
+        id: stamp
+        shell: pwsh
+        run: |
+          $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+          "timestamp=$timestamp" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "artifact=ConnectionTrackerEverywhere-$timestamp" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Restore
+        run: dotnet restore ConnectionTracker2/ConnectionTrackerEverywhere/ConnectionTrackerEverywhere.csproj
+
+      - name: Build
+        run: dotnet build ConnectionTracker2/ConnectionTrackerEverywhere/ConnectionTrackerEverywhere.csproj --configuration Release --no-restore
+
+      - name: Publish self-contained release
+        run: |
+          dotnet publish ConnectionTracker2/ConnectionTrackerEverywhere/ConnectionTrackerEverywhere.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            --output "publish/${{ steps.stamp.outputs.artifact }}" `
+            -p:PublishSingleFile=true `
+            -p:PublishTrimmed=false `
+            -p:UseAppHost=true
+
+      - name: Zip published output
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "publish/${{ steps.stamp.outputs.artifact }}/*" -DestinationPath "publish/${{ steps.stamp.outputs.artifact }}.zip" -Force
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.stamp.outputs.artifact }}
+          path: publish/${{ steps.stamp.outputs.artifact }}.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: release-${{ steps.stamp.outputs.timestamp }}
+          name: ConnectionTrackerEverywhere ${{ steps.stamp.outputs.timestamp }}
+          draft: false
+          prerelease: false
+          files: publish/${{ steps.stamp.outputs.artifact }}.zip
