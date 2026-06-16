@@ -41,11 +41,12 @@ jobs:
           dotnet publish ConnectionTracker2/ConnectionTrackerEverywhere/ConnectionTrackerEverywhere.csproj `
             --configuration Release `
             --runtime win-x64 `
-            --self-contained true `
+            --self-contained false `
             --output "publish/${{ steps.stamp.outputs.artifact }}" `
             -p:PublishSingleFile=true `
             -p:PublishTrimmed=false `
-            -p:UseAppHost=true
+            -p:UseAppHost=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true
 
       - name: Zip published output
         shell: pwsh
