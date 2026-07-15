@@ -2,7 +2,7 @@ param(
     [string]$Prefix = "evanbamystorageacct",
     [string]$ResourceGroupName = "RGPEMoveStorage",
     [string]$TopicsResourceGroupName = "RGPEMoveStorage",
-    [int]$Start = 201,
+    [int]$Start = 1,
     [int]$End = 800,
     [switch]$WhatIf
 )
@@ -31,16 +31,19 @@ for ($i = $Start; $i -le $End; $i++) {
         foreach ($topic in $matchingTopics) {
             if ($WhatIf) {
                 Write-Host "Would remove Event Grid system topic: $($topic.Name)"
-            } else {
+            }
+            else {
                 Write-Host "Removing Event Grid system topic: $($topic.Name)"
                 Remove-AzResource -ResourceId $topic.ResourceId -Force -ErrorAction SilentlyContinue
             }
         }
-    } else {
+    }
+    else {
         Write-Host "No Event Grid system topic found for: $resourceName"
     }
 
     # First remove any resource lock named "$resourceName-lock" (locks prevent deletion)
+    # NOTE: Must include -ResourceName and -ResourceType or removal will fail silently!
     $lockName = "$resourceName-lock"
     $locks = Get-AzResourceLock -ResourceGroupName $ResourceGroupName -ResourceName $resourceName -ResourceType "Microsoft.Storage/storageAccounts" -ErrorAction SilentlyContinue
     if ($locks) {
@@ -48,12 +51,17 @@ for ($i = $Start; $i -le $End; $i++) {
             if ($lock.Name -eq $lockName) {
                 if ($WhatIf) {
                     Write-Host "Would remove lock: $lockName on $resourceName"
-                } else {
+                }
+                else {
                     Write-Host "Removing lock: $lockName on $resourceName"
-                    Remove-AzResourceLock -LockName $lockName -ResourceGroupName $ResourceGroupName -Force -ErrorAction SilentlyContinue
+                    Remove-AzResourceLock -LockName $lockName -ResourceGroupName $ResourceGroupName -ResourceName $resourceName -ResourceType "Microsoft.Storage/storageAccounts" -Force -Confirm:$false -ErrorAction Stop | Out-Null
+                    Write-Host "Lock removed successfully: $lockName"
                 }
             }
         }
+    }
+    else {
+        Write-Host "No locks found on storage account: $resourceName"
     }
 
     # Then remove storage account if it exists
@@ -61,11 +69,19 @@ for ($i = $Start; $i -le $End; $i++) {
     if ($sa) {
         if ($WhatIf) {
             Write-Host "Would remove storage account: $resourceName"
-        } else {
-            Write-Host "Removing storage account: $resourceName"
-            Remove-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $resourceName -Force -ErrorAction SilentlyContinue
         }
-    } else {
+        else {
+            Write-Host "Removing storage account: $resourceName"
+            try {
+                Remove-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $resourceName -Force -Confirm:$false -ErrorAction Stop | Out-Null
+                Write-Host "Storage account deleted successfully: $resourceName"
+            }
+            catch {
+                Write-Error "Failed to delete storage account: $resourceName - Check for remaining locks or dependencies. Error: $($_)"
+            }
+        }
+    }
+    else {
         Write-Host "Storage account not found: $resourceName"
     }
 }
@@ -82,14 +98,17 @@ for ($j = 1; $j -lt $Start; $j++) {
         if (-not $existingLock) {
             if ($WhatIf) {
                 Write-Host "Would create lock: $lockName on $existingName"
-            } else {
+            }
+            else {
                 Write-Host "Creating lock: $lockName on $existingName"
                 New-AzResourceLock -LockName $lockName -LockLevel CanNotDelete -ResourceName $existingName -ResourceType "Microsoft.Storage/storageAccounts" -ResourceGroupName $ResourceGroupName -Notes "Lock to prevent accidental deletion of storage account." -Confirm:$false -Force -ErrorAction SilentlyContinue
             }
-        } else {
+        }
+        else {
             Write-Host "Lock already present: $lockName on $existingName"
         }
-    } else {
+    }
+    else {
         Write-Host "Skipping lock for missing storage account: $existingName"
     }
 }
